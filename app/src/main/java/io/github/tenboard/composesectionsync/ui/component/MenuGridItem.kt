@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,7 +32,7 @@ fun MenuGridItem(
         AsyncImage(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1.5f),
+                .weight(1f),
             model = item.imageUrl,
             contentDescription = null,
         )
@@ -38,11 +40,17 @@ fun MenuGridItem(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(0.5f),
+                .height(50.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(item.name)
-            Text("${item.price}")
+            Text(
+                text = item.name,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                "${item.price}",
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }
