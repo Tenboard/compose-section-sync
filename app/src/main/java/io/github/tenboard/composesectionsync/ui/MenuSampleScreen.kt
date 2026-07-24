@@ -59,7 +59,7 @@ fun MenuSampleScreen() {
             verticalArrangement = Arrangement.spacedBy(10.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            secondaryCategories.forEach { category ->
+            data.categories.forEach { category ->
                 items(
                     items = category.menuList,
                     key = { menu -> menu.id },
