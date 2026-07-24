@@ -26,7 +26,7 @@ fun <K : Any> rememberSectionSyncState(
         DefaultSectionSyncState(anchors, gridState)
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(state) {
         snapshotFlow {
             if (gridState.layoutInfo.visibleItemsInfo.isEmpty()) {
                 Log.w("RememberSectionSyncState", "visibleItemsInfo is Empty")
