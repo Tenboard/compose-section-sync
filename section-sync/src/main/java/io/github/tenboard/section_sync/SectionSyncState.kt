@@ -13,6 +13,9 @@ interface SectionSyncState<K : Any> {
 
     suspend fun updateActivePath(path: SectionPath<K>)
     suspend fun scrollToSection(path: SectionPath<K>)
+
+    fun selectedTabIndexAt(depth: Int): Int
+    fun updateTabIndex(list: List<Int>)
 }
 
 internal class DefaultSectionSyncState<K : Any>(
@@ -36,4 +39,18 @@ internal class DefaultSectionSyncState<K : Any>(
             Log.w("SectionSyncState", "SectionSyncState scrollToSection Fail - Anchor Not Found")
         }
     }
+
+    override fun selectedTabIndexAt(depth: Int): Int {
+        try {
+            return activePath?.tabInfo[depth] ?: 0
+        } catch (e: IndexOutOfBoundsException) {
+            Log.e("SectionSyncState", "SectionSyncState selected tab out of bounds", e)
+            return 0
+        }
+    }
+
+    override fun updateTabIndex(list: List<Int>) {
+
+    }
+
 }

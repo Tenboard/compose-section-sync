@@ -19,12 +19,15 @@ data class GridSnapshot(
 fun <K : Any> rememberSectionSyncState(
     anchors: List<SectionAnchor<K>>,
     gridState: LazyGridState,
-): SectionSyncState<K>? {
-    if (anchors.isEmpty()) return null
-
+): SectionSyncState<K> {
     val state: SectionSyncState<K> = remember(anchors, gridState) {
-        DefaultSectionSyncState(anchors, gridState)
+        DefaultSectionSyncState(
+            anchors = anchors,
+            gridState = gridState
+        )
     }
+
+    if (anchors.isEmpty()) return state
 
     LaunchedEffect(state) {
         snapshotFlow {
