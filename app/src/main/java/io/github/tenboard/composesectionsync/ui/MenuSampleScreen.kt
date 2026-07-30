@@ -1,6 +1,5 @@
 package io.github.tenboard.composesectionsync.ui
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,6 +9,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.tenboard.composesectionsync.data.local.SampleMenuDataSource
@@ -19,9 +19,12 @@ import io.github.tenboard.composesectionsync.ui.component.SecondaryCategoryTabRo
 import io.github.tenboard.section_sync.SectionAnchor
 import io.github.tenboard.section_sync.SectionPath
 import io.github.tenboard.section_sync.rememberSectionSyncState
+import kotlinx.coroutines.launch
 
 @Composable
 fun MenuSampleScreen() {
+    val coroutineScope = rememberCoroutineScope()
+
     val data = SampleMenuDataSource
     val primaryCategories = data.primaryCategories
 
@@ -49,6 +52,9 @@ fun MenuSampleScreen() {
             categories = primaryCategories,
             selectedTabIndex = primaryCategoryIndex,
             onTabSelected = { index ->
+                coroutineScope.launch {
+                    syncState.updateTabWithScrollAnimation(0, index)
+                }
             },
         )
 
@@ -56,6 +62,9 @@ fun MenuSampleScreen() {
             categories = secondaryCategories,
             selectedTabIndex = secondaryCategoryIndex,
             onTabSelected = { index ->
+                coroutineScope.launch {
+                    syncState.updateTabWithScrollAnimation(1, index)
+                }
             },
         )
 
@@ -99,8 +108,6 @@ private fun getAnchors(): List<SectionAnchor<String>> {
             firstItemIndex += category.menuList.size
         }
     }
-
-    Log.d("asdf", "anchors=$anchors")
 
     return anchors
 }

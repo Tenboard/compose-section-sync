@@ -13,6 +13,7 @@ data class GridSnapshot(
     val firstVisibleItemIndex: Int,
     val canScrollForward: Boolean,
     val canScrollBackward: Boolean,
+    val isProgrammaticScroll: Boolean,
 )
 
 @Composable
@@ -39,19 +40,20 @@ fun <K : Any> rememberSectionSyncState(
                     firstVisibleItemIndex = gridState.firstVisibleItemIndex,
                     canScrollForward = gridState.canScrollForward,
                     canScrollBackward = gridState.canScrollBackward,
+                    isProgrammaticScroll = state.isProgrammaticScroll.value
                 )
             }
         }
             .distinctUntilChanged()
             .collect { snapshot ->
-                if (snapshot == null) return@collect
+                if (snapshot == null || snapshot.isProgrammaticScroll) return@collect
 
                 val visibleGridItem = VisibleGridItem(
                     index = snapshot.firstVisibleItemIndex
                 )
 
                 resolveActiveSection(
-                    anchors = anchors,
+                    anchors = state.anchors,
                     visibleGridItem = visibleGridItem,
                     canScrollForward = snapshot.canScrollForward,
                     canScrollBackward = snapshot.canScrollBackward
