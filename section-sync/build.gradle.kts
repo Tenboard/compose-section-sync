@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.compose.compiler)
+    `maven-publish`
 }
 
 android {
@@ -23,6 +24,35 @@ android {
 
     buildFeatures {
         compose = true
+    }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
+    }
+}
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "io.github.tenboard"
+            artifactId = "compose-section-sync"
+            version = "0.1.0-alpha01"
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "transfer"
+            url = uri(
+                layout.buildDirectory.dir("maven-repository")
+            )
+        }
     }
 }
 
