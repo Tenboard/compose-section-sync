@@ -17,7 +17,7 @@ This project aims to provide reusable state and APIs for:
 - Updating the active section while the user scrolls the grid
 - Scrolling the grid when the user selects a section
 - Handling conflicts between user scrolling and programmatic scrolling
-- Supporting grids with multiple columns and dynamic section data
+- Supporting grids with multiple columns and fully loaded section data
 
 ## Initial Scope
 
