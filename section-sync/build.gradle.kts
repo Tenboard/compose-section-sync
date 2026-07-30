@@ -57,10 +57,11 @@ publishing {
 }
 
 dependencies {
-    val composeBom = platform(libs.androidx.compose.bom)
+    api(platform(libs.androidx.compose.bom))
+    api(libs.androidx.compose.foundation)
+    api(libs.androidx.compose.runtime)
 
-    implementation(composeBom)
-    implementation(libs.androidx.compose.foundation)
+    implementation(libs.kotlinx.coroutines.core)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.tooling.preview)
