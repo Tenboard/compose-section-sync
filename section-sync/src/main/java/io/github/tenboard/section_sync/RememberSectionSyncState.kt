@@ -21,7 +21,7 @@ fun <K : Any> rememberSectionSyncState(
     anchors: List<SectionAnchor<K>>,
     gridState: LazyGridState,
 ): SectionSyncState<K> {
-    val state: SectionSyncState<K> = remember(anchors, gridState) {
+    val state = remember(anchors, gridState) {
         DefaultSectionSyncState(
             anchors = anchors,
             gridState = gridState
@@ -40,7 +40,7 @@ fun <K : Any> rememberSectionSyncState(
                     firstVisibleItemIndex = gridState.firstVisibleItemIndex,
                     canScrollForward = gridState.canScrollForward,
                     canScrollBackward = gridState.canScrollBackward,
-                    isProgrammaticScroll = state.isProgrammaticScroll.value
+                    isProgrammaticScroll = state.isProgrammaticScroll
                 )
             }
         }

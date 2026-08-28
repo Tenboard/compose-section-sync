@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -28,7 +29,7 @@ fun MenuSampleScreen() {
     val data = SampleMenuDataSource
     val primaryCategories = data.primaryCategories
 
-    val anchors = getAnchors()
+    val anchors = remember { getAnchors() }
 
     val gridState = rememberLazyGridState()
     val syncState = rememberSectionSyncState(
@@ -36,14 +37,25 @@ fun MenuSampleScreen() {
         gridState = gridState,
     )
 
-    val primaryCategoryIndex = syncState.selectedTabIndexAt(0)
-    val secondaryCategoryIndex = syncState.selectedTabIndexAt(1)
+    val primaryCategoryIndex = primaryCategories
+        .indexOfFirst { category ->
+            category.id == syncState.activePath?.segments?.getOrNull(0)
+        }
+        .takeIf { index -> index >= 0 }
+        ?: 0
 
     val secondaryCategories =
         primaryCategories
             .getOrNull(primaryCategoryIndex)
             ?.subCategories
             .orEmpty()
+
+    val secondaryCategoryIndex = secondaryCategories
+        .indexOfFirst { category ->
+            category.id == syncState.activePath?.segments?.getOrNull(1)
+        }
+        .takeIf { index -> index >= 0 }
+        ?: 0
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -52,8 +64,17 @@ fun MenuSampleScreen() {
             categories = primaryCategories,
             selectedTabIndex = primaryCategoryIndex,
             onTabSelected = { index ->
-                coroutineScope.launch {
-                    syncState.updateTabWithScrollAnimation(0, index)
+                primaryCategories.getOrNull(index)?.let { primaryCategory ->
+                    primaryCategory.subCategories.firstOrNull()?.let { secondaryCategory ->
+                        val targetPath = SectionPath.of(
+                            primaryCategory.id,
+                            secondaryCategory.id,
+                        )
+
+                        coroutineScope.launch {
+                            syncState.animateScrollToSection(targetPath)
+                        }
+                    }
                 }
             },
         )
@@ -62,8 +83,18 @@ fun MenuSampleScreen() {
             categories = secondaryCategories,
             selectedTabIndex = secondaryCategoryIndex,
             onTabSelected = { index ->
-                coroutineScope.launch {
-                    syncState.updateTabWithScrollAnimation(1, index)
+                val primaryCategory = primaryCategories.getOrNull(primaryCategoryIndex)
+                val secondaryCategory = secondaryCategories.getOrNull(index)
+
+                if (primaryCategory != null && secondaryCategory != null) {
+                    val targetPath = SectionPath.of(
+                        primaryCategory.id,
+                        secondaryCategory.id,
+                    )
+
+                    coroutineScope.launch {
+                        syncState.animateScrollToSection(targetPath)
+                    }
                 }
             },
         )
@@ -94,15 +125,14 @@ private fun getAnchors(): List<SectionAnchor<String>> {
     val anchors = mutableListOf<SectionAnchor<String>>()
 
     var firstItemIndex = 0
-    SampleMenuDataSource.primaryCategories.forEachIndexed { pIndex, primaryCategory ->
-        primaryCategory.subCategories.forEachIndexed { cIndex, category ->
+    SampleMenuDataSource.primaryCategories.forEach { primaryCategory ->
+        primaryCategory.subCategories.forEach { category ->
             anchors.add(
                 SectionAnchor(
                     path = SectionPath.of(
                         primaryCategory.id, category.id,
-                        tabInfo = listOf(pIndex, cIndex)
                     ),
-                    firstItemIndex = firstItemIndex
+                    firstItemIndex = firstItemIndex,
                 )
             )
             firstItemIndex += category.menuList.size
