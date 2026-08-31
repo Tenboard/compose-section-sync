@@ -31,6 +31,58 @@ The first alpha version will support:
 - End-of-list section resolution
 - Programmatic scroll conflict handling
 
+## Usage
+
+Define each section with stable keys in parent-to-child order and connect the
+path to the first item index of that section.
+
+```kotlin
+val anchors = listOf(
+    SectionAnchor(
+        path = SectionPath.of("food", "korean"),
+        firstItemIndex = 0,
+    ),
+    SectionAnchor(
+        path = SectionPath.of("food", "western"),
+        firstItemIndex = 12,
+    ),
+    SectionAnchor(
+        path = SectionPath.of("drink", "coffee"),
+        firstItemIndex = 24,
+    ),
+)
+
+val gridState = rememberLazyGridState()
+val coroutineScope = rememberCoroutineScope()
+val sectionSyncState = rememberSectionSyncState(
+    anchors = anchors,
+    gridState = gridState,
+)
+```
+
+Read the active key at any category level.
+
+```kotlin
+private const val PRIMARY_CATEGORY_LEVEL = 0
+private const val SECONDARY_CATEGORY_LEVEL = 1
+
+val primaryCategoryKey =
+    sectionSyncState.activeKeyAtOrNull(PRIMARY_CATEGORY_LEVEL)
+
+val secondaryCategoryKey =
+    sectionSyncState.activeKeyAtOrNull(SECONDARY_CATEGORY_LEVEL)
+```
+
+Scroll to an exact section path.
+
+```kotlin
+coroutineScope.launch {
+    sectionSyncState.animateScrollToSection(
+        SectionPath.of("drink", "coffee"),
+    )
+}
+```
+
 ## Non-goals
 
 The first alpha version will not support:
