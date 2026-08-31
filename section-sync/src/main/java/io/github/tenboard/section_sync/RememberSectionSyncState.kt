@@ -1,6 +1,5 @@
 package io.github.tenboard.section_sync
 
-import android.util.Log
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,7 +32,6 @@ fun <K : Any> rememberSectionSyncState(
     LaunchedEffect(state) {
         snapshotFlow {
             if (gridState.layoutInfo.visibleItemsInfo.isEmpty()) {
-                Log.w("RememberSectionSyncState", "visibleItemsInfo is Empty")
                 return@snapshotFlow null
             } else {
                 GridSnapshot(

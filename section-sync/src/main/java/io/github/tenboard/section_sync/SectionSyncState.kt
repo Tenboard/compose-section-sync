@@ -39,7 +39,6 @@ internal class DefaultSectionSyncState<K : Any>(
 
     fun updateActivePath(path: SectionPath<K>) {
         mutableActivePath = path
-        Log.d("SectionSyncState", "SectionSyncState activePath=$activePath")
     }
 
     override suspend fun scrollToSection(path: SectionPath<K>) {
