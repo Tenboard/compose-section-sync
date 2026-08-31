@@ -9,7 +9,7 @@ import androidx.compose.runtime.snapshotFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 
-data class GridSnapshot(
+internal data class GridSnapshot(
     val firstVisibleItemIndex: Int,
     val canScrollForward: Boolean,
     val canScrollBackward: Boolean,

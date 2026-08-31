@@ -13,6 +13,16 @@ interface SectionSyncState<K : Any> {
     suspend fun animateScrollToSection(path: SectionPath<K>)
 }
 
+/**
+ * Returns the key at the zero-based [level],
+ * or `null` when the level is out of bounds.
+ */
+fun <K : Any> SectionSyncState<K>.activeKeyAtOrNull(
+    level: Int,
+): K? {
+    return activePath?.keyAtOrNull(level)
+}
+
 internal class DefaultSectionSyncState<K : Any>(
     val anchors: List<SectionAnchor<K>>,
     private val gridState: LazyGridState,

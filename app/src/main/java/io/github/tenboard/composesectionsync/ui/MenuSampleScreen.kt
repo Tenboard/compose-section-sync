@@ -19,6 +19,7 @@ import io.github.tenboard.composesectionsync.ui.component.PrimaryCategoryTabRow
 import io.github.tenboard.composesectionsync.ui.component.SecondaryCategoryTabRow
 import io.github.tenboard.section_sync.SectionAnchor
 import io.github.tenboard.section_sync.SectionPath
+import io.github.tenboard.section_sync.activeKeyAtOrNull
 import io.github.tenboard.section_sync.rememberSectionSyncState
 import kotlinx.coroutines.launch
 
@@ -37,9 +38,12 @@ fun MenuSampleScreen() {
         gridState = gridState,
     )
 
+    val primaryCategoryId = syncState.activeKeyAtOrNull(PRIMARY_CATEGORY_LEVEL)
+    val secondaryCategoryId = syncState.activeKeyAtOrNull(SECONDARY_CATEGORY_LEVEL)
+
     val primaryCategoryIndex = primaryCategories
         .indexOfFirst { category ->
-            category.id == syncState.activePath?.segments?.getOrNull(0)
+            category.id == primaryCategoryId
         }
         .takeIf { index -> index >= 0 }
         ?: 0
@@ -52,7 +56,7 @@ fun MenuSampleScreen() {
 
     val secondaryCategoryIndex = secondaryCategories
         .indexOfFirst { category ->
-            category.id == syncState.activePath?.segments?.getOrNull(1)
+            category.id == secondaryCategoryId
         }
         .takeIf { index -> index >= 0 }
         ?: 0
@@ -141,3 +145,6 @@ private fun getAnchors(): List<SectionAnchor<String>> {
 
     return anchors
 }
+
+private const val PRIMARY_CATEGORY_LEVEL = 0
+private const val SECONDARY_CATEGORY_LEVEL = 1
