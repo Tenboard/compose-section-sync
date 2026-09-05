@@ -19,11 +19,13 @@ internal data class GridSnapshot(
 fun <K : Any> rememberSectionSyncState(
     anchors: List<SectionAnchor<K>>,
     gridState: LazyGridState,
+    sectionSyncOptions: SectionSyncOptions = SectionSyncOptions(),
 ): SectionSyncState<K> {
-    val state = remember(anchors, gridState) {
+    val state = remember(anchors, gridState, sectionSyncOptions) {
         DefaultSectionSyncState(
             anchors = anchors,
-            gridState = gridState
+            gridState = gridState,
+            sectionSyncOptions = sectionSyncOptions,
         )
     }
 

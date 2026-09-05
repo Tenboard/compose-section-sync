@@ -17,8 +17,10 @@ import io.github.tenboard.composesectionsync.data.local.SampleMenuDataSource
 import io.github.tenboard.composesectionsync.ui.component.MenuGridItem
 import io.github.tenboard.composesectionsync.ui.component.PrimaryCategoryTabRow
 import io.github.tenboard.composesectionsync.ui.component.SecondaryCategoryTabRow
+import io.github.tenboard.section_sync.OngoingScrollBehavior
 import io.github.tenboard.section_sync.SectionAnchor
 import io.github.tenboard.section_sync.SectionPath
+import io.github.tenboard.section_sync.SectionSyncOptions
 import io.github.tenboard.section_sync.activeKeyAtOrNull
 import io.github.tenboard.section_sync.rememberSectionSyncState
 import kotlinx.coroutines.launch
@@ -36,6 +38,9 @@ fun MenuSampleScreen() {
     val syncState = rememberSectionSyncState(
         anchors = anchors,
         gridState = gridState,
+        sectionSyncOptions = SectionSyncOptions(
+            ongoingScrollBehavior = OngoingScrollBehavior.InterruptAndProceed,
+        ),
     )
 
     val primaryCategoryId = syncState.activeKeyAtOrNull(PRIMARY_CATEGORY_LEVEL)
