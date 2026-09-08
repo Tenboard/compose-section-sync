@@ -38,7 +38,7 @@ publishing {
         register<MavenPublication>("release") {
             groupId = "io.github.tenboard"
             artifactId = "compose-section-sync"
-            version = "0.1.0-alpha02"
+            version = "0.1.0-alpha03"
 
             afterEvaluate {
                 from(components["release"])
