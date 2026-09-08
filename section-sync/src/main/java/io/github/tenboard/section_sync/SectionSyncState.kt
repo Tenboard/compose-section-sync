@@ -8,6 +8,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.job
 
 interface SectionSyncState<K : Any> {
     val activePath: SectionPath<K>?
@@ -15,12 +21,16 @@ interface SectionSyncState<K : Any> {
     /**
      * Call from a coroutine with a Compose frame clock, such as one launched using
      * `rememberCoroutineScope` or `LaunchedEffect`.
+     * The request is cancelled if the anchor mapping changes, another request supersedes it,
+     * or this state leaves the Composition.
      */
     suspend fun scrollToSection(path: SectionPath<K>)
 
     /**
      * Call from a coroutine with a Compose frame clock, such as one launched using
      * `rememberCoroutineScope` or `LaunchedEffect`.
+     * The request is cancelled if the anchor mapping changes, another request supersedes it,
+     * or this state leaves the Composition.
      */
     suspend fun animateScrollToSection(path: SectionPath<K>)
 }
@@ -36,10 +46,16 @@ fun <K : Any> SectionSyncState<K>.activeKeyAtOrNull(
 }
 
 internal class DefaultSectionSyncState<K : Any>(
-    val anchors: List<SectionAnchor<K>>,
+    anchors: List<SectionAnchor<K>>,
     private val gridState: LazyGridState,
-    private val sectionSyncOptions: SectionSyncOptions,
+    private var sectionSyncOptions: SectionSyncOptions,
 ) : SectionSyncState<K> {
+
+    var anchors by mutableStateOf(anchors.toList())
+        private set
+
+    private var activeScrollJob: Job? = null
+    private var isDisposed = false
 
     private var mutableActivePath by mutableStateOf<SectionPath<K>?>(null)
     override val activePath: SectionPath<K>?
@@ -50,49 +66,79 @@ internal class DefaultSectionSyncState<K : Any>(
 
     private var latestScrollRequestId: Long = 0L
 
-    fun updateActivePath(path: SectionPath<K>) {
-        mutableActivePath = path
+    fun updateActivePath(path: SectionPath<K>?) {
+        if (!isDisposed) {
+            mutableActivePath = path
+        }
+    }
+
+    fun updateInputs(
+        anchors: List<SectionAnchor<K>>,
+        sectionSyncOptions: SectionSyncOptions,
+    ) {
+        if (isDisposed) return
+
+        this.sectionSyncOptions = sectionSyncOptions
+        if (this.anchors != anchors) {
+            cancelScrollRequest()
+            this.anchors = anchors.toList()
+
+            if (this.anchors.none { it.path == activePath }) {
+                mutableActivePath = null
+            }
+        }
+    }
+
+    fun dispose() {
+        if (isDisposed) return
+
+        isDisposed = true
+        cancelScrollRequest()
+        mutableActivePath = null
+    }
+
+    private fun cancelScrollRequest() {
+        latestScrollRequestId++
+        activeScrollJob?.cancel()
     }
 
     override suspend fun scrollToSection(path: SectionPath<K>) {
-        val findAnchor = anchors.find { it.path == path }
-
-        if (findAnchor != null) {
-            scrollToAnchor(findAnchor, false)
-        } else {
-            Log.w("SectionSyncState", "SectionSyncState scrollToSection Fail - Anchor Not Found")
-        }
+        scrollToPath(path, animated = false)
     }
 
     override suspend fun animateScrollToSection(path: SectionPath<K>) {
-        val findAnchor = anchors.find { it.path == path }
-
-        if (findAnchor != null) {
-            scrollToAnchor(findAnchor, true)
-        } else {
-            Log.w(
-                "SectionSyncState",
-                "SectionSyncState animateScrollToSection Fail - Anchor Not Found"
-            )
-        }
+        scrollToPath(path, animated = true)
     }
 
-    private suspend fun scrollToAnchor(
-        anchor: SectionAnchor<K>,
+    private suspend fun scrollToPath(
+        path: SectionPath<K>,
         animated: Boolean,
-    ) {
+    ) = coroutineScope {
+        if (isDisposed) return@coroutineScope
+        if (anchors.none { it.path == path }) {
+            Log.w("SectionSyncState", "Section scroll failed: anchor not found")
+            return@coroutineScope
+        }
+
         val requestId = ++latestScrollRequestId
         val wasScrolling = gridState.isScrollInProgress
+        val scrollBehavior = sectionSyncOptions.ongoingScrollBehavior
+        val previousJob = activeScrollJob
+        val requestJob = currentCoroutineContext().job
 
+        // This scope owns only this request; cancelling it does not cancel the caller's parent Job.
+        activeScrollJob = requestJob
         isProgrammaticScroll = true
 
         try {
+            previousJob?.cancelAndJoin()
+
             if (wasScrolling) {
                 gridState.stopScroll(MutatePriority.PreventUserInput)
 
-                when (sectionSyncOptions.ongoingScrollBehavior) {
+                when (scrollBehavior) {
                     OngoingScrollBehavior.InterruptAndDiscardRequest -> {
-                        return
+                        return@coroutineScope
                     }
 
                     OngoingScrollBehavior.InterruptAndProceed -> {
@@ -101,10 +147,12 @@ internal class DefaultSectionSyncState<K : Any>(
                 }
             }
 
-            if (requestId != latestScrollRequestId) {
-                return
+            ensureActive()
+            if (isDisposed || requestId != latestScrollRequestId) {
+                return@coroutineScope
             }
 
+            val anchor = anchors.find { it.path == path } ?: return@coroutineScope
             updateActivePath(anchor.path)
 
             if (animated) {
@@ -113,7 +161,8 @@ internal class DefaultSectionSyncState<K : Any>(
                 gridState.scrollToItem(anchor.firstItemIndex)
             }
         } finally {
-            if (requestId == latestScrollRequestId) {
+            if (activeScrollJob === requestJob) {
+                activeScrollJob = null
                 isProgrammaticScroll = false
             }
         }
