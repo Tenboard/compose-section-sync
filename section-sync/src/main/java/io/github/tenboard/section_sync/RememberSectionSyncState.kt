@@ -13,9 +13,11 @@ internal data class GridSnapshot<K : Any>(
     val anchors: List<SectionAnchor<K>>,
     val hasVisibleItems: Boolean,
     val firstVisibleItemIndex: Int,
+    val firstVisibleItemScrollOffset: Int,
     val canScrollForward: Boolean,
     val canScrollBackward: Boolean,
     val isProgrammaticScroll: Boolean,
+    val options: SectionSyncOptions,
 )
 
 /**
@@ -23,8 +25,15 @@ internal data class GridSnapshot<K : Any>(
  *
  * Provide [anchors] for the same item order rendered by the grid. Replace the list when that
  * mapping changes, and keep section paths and their keys immutable.
+ * Each anchor must point to an existing grid item. Omit sections with no rendered items.
+ * Indices must be non-negative and strictly increasing, and paths must be unique.
  * Anchor changes cancel the current section scroll request without restarting it;
- * an empty list also clears the active path. Updated options apply to subsequent requests.
+ * an empty list also clears the active path. Selection-policy changes clear retained selection
+ * and re-evaluate the viewport (after the current request ends if one is running).
+ * Updated ongoing-scroll behavior applies to subsequent requests.
+ *
+ * @throws IllegalArgumentException if anchor indices are negative, repeated, or out of order,
+ * or if paths are repeated.
  */
 @Composable
 fun <K : Any> rememberSectionSyncState(
@@ -51,30 +60,9 @@ fun <K : Any> rememberSectionSyncState(
     }
 
     LaunchedEffect(state) {
-        snapshotFlow {
-            GridSnapshot(
-                anchors = state.anchors,
-                hasVisibleItems = gridState.layoutInfo.visibleItemsInfo.isNotEmpty(),
-                firstVisibleItemIndex = gridState.firstVisibleItemIndex,
-                canScrollForward = gridState.canScrollForward,
-                canScrollBackward = gridState.canScrollBackward,
-                isProgrammaticScroll = state.isProgrammaticScroll,
-            )
-        }
-            .collect { snapshot ->
-                if (snapshot.isProgrammaticScroll) return@collect
-
-                val activePath = if (snapshot.hasVisibleItems) {
-                    resolveActiveSection(
-                        anchors = snapshot.anchors,
-                        visibleGridItem = VisibleGridItem(snapshot.firstVisibleItemIndex),
-                        canScrollForward = snapshot.canScrollForward,
-                        canScrollBackward = snapshot.canScrollBackward,
-                    )?.path
-                } else {
-                    null
-                }
-                state.updateActivePath(activePath)
+        snapshotFlow { state.gridSnapshot() }
+            .collect {
+                state.syncActivePath()
             }
     }
 
