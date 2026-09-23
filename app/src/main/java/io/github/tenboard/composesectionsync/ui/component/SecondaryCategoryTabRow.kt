@@ -6,10 +6,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.tenboard.composesectionsync.model.Category
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SecondaryCategoryTabRow(
     categories: List<Category>,
@@ -37,10 +40,10 @@ fun SecondaryCategoryTabRow(
         containerColor = MaterialTheme.colorScheme.surface,
         contentColor = selectedColor,
         edgePadding = 12.dp,
-        indicator = {
+        indicator = { tabPositions ->
             Box(
                 modifier = Modifier
-                    .tabIndicatorOffset(selectedIndex)
+                    .tabIndicatorOffset(tabPositions[selectedIndex])
                     .padding(horizontal = 16.dp)
                     .height(3.dp)
                     .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
