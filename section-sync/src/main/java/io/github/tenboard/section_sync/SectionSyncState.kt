@@ -48,12 +48,14 @@ fun <K : Any> SectionSyncState<K>.activeKeyAtOrNull(
 internal class DefaultSectionSyncState<K : Any>(
     anchors: List<SectionAnchor<K>>,
     private val gridState: LazyGridState,
-    private var sectionSyncOptions: SectionSyncOptions,
+    sectionSyncOptions: SectionSyncOptions,
 ) : SectionSyncState<K> {
 
-    var anchors by mutableStateOf(anchors.toList())
+    var anchors by mutableStateOf(anchors.toList().also { validateAnchors(it) })
         private set
 
+    private var sectionSyncOptions by mutableStateOf(sectionSyncOptions)
+    private var retainedPosition: Pair<Int, Int>? = null
     private var activeScrollJob: Job? = null
     private var isDisposed = false
 
@@ -66,10 +68,38 @@ internal class DefaultSectionSyncState<K : Any>(
 
     private var latestScrollRequestId: Long = 0L
 
-    fun updateActivePath(path: SectionPath<K>?) {
-        if (!isDisposed) {
-            mutableActivePath = path
+    fun gridSnapshot() = GridSnapshot(
+        anchors = anchors,
+        hasVisibleItems = gridState.layoutInfo.visibleItemsInfo.isNotEmpty(),
+        firstVisibleItemIndex = gridState.firstVisibleItemIndex,
+        firstVisibleItemScrollOffset = gridState.firstVisibleItemScrollOffset,
+        canScrollForward = gridState.canScrollForward,
+        canScrollBackward = gridState.canScrollBackward,
+        isProgrammaticScroll = isProgrammaticScroll,
+        options = sectionSyncOptions,
+    )
+
+    fun syncActivePath() {
+        if (isDisposed || isProgrammaticScroll) return
+
+        // Read current inputs: a collected snapshot can predate a completed request or input update.
+        val snapshot = gridSnapshot()
+        if (snapshot.anchors.isEmpty() || !snapshot.hasVisibleItems) {
+            retainedPosition = null
+            mutableActivePath = null
+            return
         }
+
+        val position = snapshot.firstVisibleItemIndex to snapshot.firstVisibleItemScrollOffset
+        if (retainedPosition == position) return
+        retainedPosition = null
+        mutableActivePath = resolveActiveSectionValidated(
+            anchors = snapshot.anchors,
+            visibleGridItem = VisibleGridItem(snapshot.firstVisibleItemIndex),
+            canScrollForward = snapshot.canScrollForward,
+            canScrollBackward = snapshot.canScrollBackward,
+            options = snapshot.options,
+        )?.path
     }
 
     fun updateInputs(
@@ -78,14 +108,25 @@ internal class DefaultSectionSyncState<K : Any>(
     ) {
         if (isDisposed) return
 
+        val anchorsChanged = this.anchors != anchors
+        if (anchorsChanged) validateAnchors(anchors)
+        val selectionChanged =
+            this.sectionSyncOptions.shortContentSelection != sectionSyncOptions.shortContentSelection ||
+                this.sectionSyncOptions.endOfContentSelection != sectionSyncOptions.endOfContentSelection ||
+                this.sectionSyncOptions.selectionAfterScroll != sectionSyncOptions.selectionAfterScroll
+
         this.sectionSyncOptions = sectionSyncOptions
-        if (this.anchors != anchors) {
+        if (anchorsChanged) {
             cancelScrollRequest()
             this.anchors = anchors.toList()
 
             if (this.anchors.none { it.path == activePath }) {
                 mutableActivePath = null
             }
+        }
+        if (anchorsChanged || selectionChanged) {
+            retainedPosition = null
+            syncActivePath()
         }
     }
 
@@ -94,6 +135,7 @@ internal class DefaultSectionSyncState<K : Any>(
 
         isDisposed = true
         cancelScrollRequest()
+        retainedPosition = null
         mutableActivePath = null
     }
 
@@ -129,6 +171,8 @@ internal class DefaultSectionSyncState<K : Any>(
         // This scope owns only this request; cancelling it does not cancel the caller's parent Job.
         activeScrollJob = requestJob
         isProgrammaticScroll = true
+        retainedPosition = null
+        var completed = false
 
         try {
             previousJob?.cancelAndJoin()
@@ -153,17 +197,26 @@ internal class DefaultSectionSyncState<K : Any>(
             }
 
             val anchor = anchors.find { it.path == path } ?: return@coroutineScope
-            updateActivePath(anchor.path)
+            mutableActivePath = anchor.path
 
             if (animated) {
                 gridState.animateScrollToItem(anchor.firstItemIndex)
             } else {
                 gridState.scrollToItem(anchor.firstItemIndex)
             }
+            ensureActive()
+            completed = true
         } finally {
             if (activeScrollJob === requestJob) {
                 activeScrollJob = null
                 isProgrammaticScroll = false
+                if (completed && requestId == latestScrollRequestId && !isDisposed &&
+                    sectionSyncOptions.selectionAfterScroll ==
+                    SelectionAfterScroll.KeepRequestedUntilPositionChanges
+                ) {
+                    retainedPosition = gridState.firstVisibleItemIndex to gridState.firstVisibleItemScrollOffset
+                }
+                syncActivePath()
             }
         }
     }
