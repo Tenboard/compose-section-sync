@@ -5,6 +5,21 @@ import io.github.tenboard.composesectionsync.model.Menu
 import io.github.tenboard.composesectionsync.model.PrimaryCategory
 
 internal object SampleMenuDataSource {
+    private const val BURGER_IMAGE_URL =
+        "https://images.unsplash.com/photo-1568901346375-23c9450c58cd"
+    private const val PIZZA_IMAGE_URL =
+        "https://images.unsplash.com/photo-1574071318508-1cdbab80d002"
+    private const val PASTA_IMAGE_URL =
+        "https://images.unsplash.com/photo-1551892374-ecf8754cf8b0"
+    private const val SALAD_IMAGE_URL =
+        "https://images.unsplash.com/photo-1540420773420-3366772f4999"
+    private const val SIDE_IMAGE_URL =
+        "https://images.unsplash.com/photo-1573080496219-bb080dd4f877"
+    private const val DESSERT_IMAGE_URL =
+        "https://images.unsplash.com/photo-1551024506-0bccd828d307"
+    private const val BEVERAGE_IMAGE_URL =
+        "https://images.unsplash.com/photo-1544145945-f90425340c7e"
+
     private val secondaryCategories: List<Category> = listOf(
         Category(
             id = "burger",
@@ -140,19 +155,4 @@ internal object SampleMenuDataSource {
         price = price,
         imageUrl = imageUrl,
     )
-
-    private const val BURGER_IMAGE_URL =
-        "https://images.unsplash.com/photo-1568901346375-23c9450c58cd"
-    private const val PIZZA_IMAGE_URL =
-        "https://images.unsplash.com/photo-1574071318508-1cdbab80d002"
-    private const val PASTA_IMAGE_URL =
-        "https://images.unsplash.com/photo-1551892374-ecf8754cf8b0"
-    private const val SALAD_IMAGE_URL =
-        "https://images.unsplash.com/photo-1540420773420-3366772f4999"
-    private const val SIDE_IMAGE_URL =
-        "https://images.unsplash.com/photo-1573080496219-bb080dd4f877"
-    private const val DESSERT_IMAGE_URL =
-        "https://images.unsplash.com/photo-1551024506-0bccd828d307"
-    private const val BEVERAGE_IMAGE_URL =
-        "https://images.unsplash.com/photo-1544145945-f90425340c7e"
 }

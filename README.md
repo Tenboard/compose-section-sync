@@ -6,6 +6,55 @@ section-based tabs and `LazyVerticalGrid` scrolling.
 > 🚧 This project is in early development.
 > No stable artifact has been published yet.
 
+## Compatibility
+
+The `0.1.0-alpha04` build uses the following baseline:
+
+| Component | Version |
+| --- | --- |
+| Android minimum SDK | 21 |
+| Android compile SDK | 34 |
+| Compose Foundation / Runtime | 1.6.8 |
+| Kotlin | 1.9.25 |
+| Compose Compiler | 1.5.15 |
+| Coroutines | 1.8.1 |
+| JVM bytecode target | 11 |
+
+Build this repository with JDK 17, Gradle 8.1.1, and Android Gradle Plugin 8.1.4.
+The sample uses the same baseline to check compatibility. These build-tool
+versions describe this repository; consuming apps use their own build tools.
+
+AGP 8.1.4's bundled Lint skips some Compose Runtime checks because of Lint API
+differences. To run them with Lint 8.4.2 without changing the build baseline:
+
+```shell
+./gradlew :section-sync:lintDebug :app:lintDebug -Pandroid.experimental.lint.version=8.4.2
+```
+
+The library declares Foundation and Runtime as API dependencies and Coroutines
+as an implementation dependency. It does not publish a Compose BOM constraint
+or depend directly on Material3, AppCompat, Material Components, Core KTX, or
+preview tooling. Compose UI and other dependencies required by Foundation are
+still included transitively. Apps can select newer compatible versions through
+their own dependency management.
+
+To build and generate the local Maven repository:
+
+```shell
+./gradlew :section-sync:assembleRelease :app:assembleDebug \
+    :section-sync:publishReleasePublicationToTransferRepository
+```
+
+The repository is written to `section-sync/build/maven-repository`. Register
+that directory as a Maven repository in the consuming app and use:
+
+```kotlin
+implementation("io.github.tenboard:compose-section-sync:0.1.0-alpha04")
+```
+
+This version has a separate Maven coordinate from `alpha03`; do not overwrite
+the earlier artifact when transferring a build to another project.
+
 ## Motivation
 
 Jetpack Compose provides low-level scrolling and layout information through
