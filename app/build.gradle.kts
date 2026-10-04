@@ -1,16 +1,18 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
     namespace = "io.github.tenboard.composesectionsync"
-    compileSdk = 34
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "io.github.tenboard.composesectionsync"
         minSdk = 21
-        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -26,15 +28,15 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
-    }
     buildFeatures {
         viewBinding = true
         compose = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_11)
     }
 }
 

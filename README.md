@@ -8,28 +8,30 @@ section-based tabs and `LazyVerticalGrid` scrolling.
 
 ## Compatibility
 
-The `0.1.0-alpha04` build uses the following baseline:
+The `0.1.0-alpha05` build uses the following baseline:
 
 | Component | Version |
 | --- | --- |
 | Android minimum SDK | 21 |
 | Android compile SDK | 34 |
 | Compose Foundation / Runtime | 1.6.8 |
-| Kotlin | 1.9.25 |
-| Compose Compiler | 1.5.15 |
+| Kotlin | 2.0.21 |
+| Compose Compiler Gradle plugin | 2.0.21 |
 | Coroutines | 1.8.1 |
 | JVM bytecode target | 11 |
 
-Build this repository with JDK 17, Gradle 8.1.1, and Android Gradle Plugin 8.1.4.
-The sample uses the same baseline to check compatibility. These build-tool
-versions describe this repository; consuming apps use their own build tools.
+Build this repository with JDK 17, Gradle 8.11.1, and Android Gradle Plugin 8.10.1.
+The sample uses compile SDK 36; the library keeps compile SDK 34 and the
+dependency baseline above. These build-tool versions describe this repository;
+consuming apps use their own build tools.
 
-AGP 8.1.4's bundled Lint skips some Compose Runtime checks because of Lint API
-differences. To run them with Lint 8.4.2 without changing the build baseline:
+Kotlin 2.0 is the minimum supported compiler line from `alpha05`. Both the
+library and sample use Kotlin 2.0.21 with the matching
+`org.jetbrains.kotlin.plugin.compose` plugin. `alpha04` retains the previous
+Kotlin 1.9.25 baseline.
 
-```shell
-./gradlew :section-sync:lintDebug :app:lintDebug -Pandroid.experimental.lint.version=8.4.2
-```
+This AGP/Gradle combination is newer than Kotlin 2.0.21's fully supported
+toolchain range, so compatibility must be checked when changing build tools.
 
 The library declares Foundation and Runtime as API dependencies and Coroutines
 as an implementation dependency. It does not publish a Compose BOM constraint
@@ -49,10 +51,10 @@ The repository is written to `section-sync/build/maven-repository`. Register
 that directory as a Maven repository in the consuming app and use:
 
 ```kotlin
-implementation("io.github.tenboard:compose-section-sync:0.1.0-alpha04")
+implementation("io.github.tenboard:compose-section-sync:0.1.0-alpha05")
 ```
 
-This version has a separate Maven coordinate from `alpha03`; do not overwrite
+This version has a separate Maven coordinate from `alpha04`; do not overwrite
 the earlier artifact when transferring a build to another project.
 
 ## Motivation

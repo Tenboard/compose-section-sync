@@ -1,12 +1,15 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.compose.compiler)
     `maven-publish`
 }
 
 android {
     namespace = "io.github.tenboard.section_sync"
-    compileSdk = 34
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 21
@@ -17,14 +20,6 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
-    }
-
     buildFeatures {
         compose = true
     }
@@ -36,12 +31,18 @@ android {
     }
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_11)
+    }
+}
+
 publishing {
     publications {
         register<MavenPublication>("release") {
             groupId = "io.github.tenboard"
             artifactId = "compose-section-sync"
-            version = "0.1.0-alpha04"
+            version = "0.1.0-alpha05"
 
             afterEvaluate {
                 from(components["release"])
