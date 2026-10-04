@@ -14,6 +14,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.tenboard.composesectionsync.data.local.SampleMenuDataSource
+import io.github.tenboard.composesectionsync.ui.component.AppHeader
 import io.github.tenboard.composesectionsync.ui.component.MenuGridItem
 import io.github.tenboard.composesectionsync.ui.component.PrimaryCategoryTabRow
 import io.github.tenboard.composesectionsync.ui.component.SecondaryCategoryTabRow
@@ -69,6 +70,8 @@ fun MenuSampleScreen() {
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
+        AppHeader()
+
         PrimaryCategoryTabRow(
             categories = primaryCategories,
             selectedTabIndex = primaryCategoryIndex,
