@@ -30,12 +30,20 @@ import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import io.github.tenboard.composesectionsync.R
 import io.github.tenboard.composesectionsync.model.Menu
+import java.math.BigDecimal
+import java.text.NumberFormat
+import java.util.Locale
 
 @Composable
 fun MenuGridItem(
     item: Menu,
     modifier: Modifier = Modifier,
 ) {
+    val formattedPrice = remember(item.priceCents) {
+        NumberFormat.getCurrencyInstance(Locale.US)
+            .format(BigDecimal.valueOf(item.priceCents.toLong(), 2))
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -92,7 +100,7 @@ fun MenuGridItem(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "${item.price}",
+                text = formattedPrice,
                 modifier = Modifier.height(20.dp),
                 textAlign = TextAlign.Start,
                 color = MaterialTheme.colorScheme.primary,

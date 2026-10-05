@@ -5,104 +5,343 @@ import io.github.tenboard.composesectionsync.model.Menu
 import io.github.tenboard.composesectionsync.model.PrimaryCategory
 
 internal object SampleMenuDataSource {
-    private const val BURGER_IMAGE_URL =
-        "https://images.unsplash.com/photo-1568901346375-23c9450c58cd"
-    private const val PIZZA_IMAGE_URL =
-        "https://images.unsplash.com/photo-1574071318508-1cdbab80d002"
-    private const val PASTA_IMAGE_URL =
-        "https://images.unsplash.com/photo-1551892374-ecf8754cf8b0"
-    private const val SALAD_IMAGE_URL =
-        "https://images.unsplash.com/photo-1540420773420-3366772f4999"
-    private const val SIDE_IMAGE_URL =
-        "https://images.unsplash.com/photo-1573080496219-bb080dd4f877"
-    private const val DESSERT_IMAGE_URL =
-        "https://images.unsplash.com/photo-1551024506-0bccd828d307"
-    private const val BEVERAGE_IMAGE_URL =
-        "https://images.unsplash.com/photo-1544145945-f90425340c7e"
+    // Free photo licenses: https://www.pexels.com/license/ and https://unsplash.com/license
 
     private val secondaryCategories: List<Category> = listOf(
         Category(
             id = "burger",
-            name = "버거",
+            name = "Burgers",
             menuList = listOf(
-                menu("burger-classic", "클래식 치즈버거", 8_900, BURGER_IMAGE_URL),
-                menu("burger-double", "더블 비프 버거", 11_900, BURGER_IMAGE_URL),
-                menu("burger-bacon", "베이컨 에그 버거", 10_900, BURGER_IMAGE_URL),
-                menu("burger-chicken", "크리스피 치킨버거", 9_500, BURGER_IMAGE_URL),
-                menu("burger-shrimp", "통새우 버거", 10_500, BURGER_IMAGE_URL),
-                menu("burger-mushroom", "머쉬룸 치즈버거", 10_900, BURGER_IMAGE_URL),
+                // mahdisa ramezanzadeh: https://www.pexels.com/photo/close-up-of-a-beef-cheeseburger-on-a-plate-18592187/
+                menu(
+                    id = "burger-classic",
+                    name = "Classic Cheeseburger",
+                    priceCents = 890,
+                    imageUrl = "https://images.pexels.com/photos/18592187/pexels-photo-18592187.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
+                // Enis Yavuz: https://unsplash.com/photos/burger-with-lettuce-and-tomato-tuuh4DrgMpU
+                menu(
+                    id = "burger-double",
+                    name = "Double Beef Burger",
+                    priceCents = 1_190,
+                    imageUrl = "https://images.unsplash.com/photo-1599155253646-7989e08c05c1?auto=format&fit=crop&w=800&h=600&q=80",
+                ),
+                // Jonathan Borba: https://unsplash.com/photos/a-bacon-egg-and-cheese-burger-on-a-black-background-fB905lrmzMU
+                menu(
+                    id = "burger-bacon",
+                    name = "Bacon & Egg Burger",
+                    priceCents = 1_090,
+                    imageUrl = "https://images.unsplash.com/photo-1700835880369-467ebff9d324?auto=format&fit=crop&w=800&h=600&q=80",
+                ),
+                // Erwin Quintana: https://www.pexels.com/photo/photograph-of-a-chicken-burger-7963093/
+                menu(
+                    id = "burger-chicken",
+                    name = "Crispy Chicken Burger",
+                    priceCents = 950,
+                    imageUrl = "https://images.pexels.com/photos/7963093/pexels-photo-7963093.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
+                // FAÍSCA CRIATIVA: https://www.pexels.com/photo/a-shrimp-sandwich-with-cheese-and-sauce-on-top-27988485/
+                menu(
+                    id = "burger-shrimp",
+                    name = "Shrimp Burger",
+                    priceCents = 1_050,
+                    imageUrl = "https://images.pexels.com/photos/27988485/pexels-photo-27988485.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
+                // Christian Gazzabini: https://www.pexels.com/photo/gourmet-mushroom-and-cheese-burger-with-fries-31992843/
+                menu(
+                    id = "burger-mushroom",
+                    name = "Mushroom Cheeseburger",
+                    priceCents = 1_090,
+                    imageUrl = "https://images.pexels.com/photos/31992843/pexels-photo-31992843.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600&crop=bottom",
+                ),
             ),
         ),
         Category(
             id = "pizza",
-            name = "피자",
+            name = "Pizza",
             menuList = listOf(
-                menu("pizza-margherita", "마르게리타 피자", 15_900, PIZZA_IMAGE_URL),
-                menu("pizza-pepperoni", "페퍼로니 피자", 17_900, PIZZA_IMAGE_URL),
-                menu("pizza-cheese", "콰트로 치즈 피자", 18_900, PIZZA_IMAGE_URL),
-                menu("pizza-hawaiian", "하와이안 피자", 17_500, PIZZA_IMAGE_URL),
-                menu("pizza-bulgogi", "불고기 피자", 19_900, PIZZA_IMAGE_URL),
-                menu("pizza-potato", "베이컨 포테이토 피자", 19_500, PIZZA_IMAGE_URL),
+                // Amit Fulwaria: https://www.pexels.com/photo/top-view-of-a-pizza-margherita-20115306/
+                menu(
+                    id = "pizza-margherita",
+                    name = "Margherita Pizza",
+                    priceCents = 1_590,
+                    imageUrl = "https://images.pexels.com/photos/20115306/pexels-photo-20115306.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
+                // amirali mirhashemian: https://unsplash.com/photos/pepperoni-pizza-r_1JnXTYKnA
+                menu(
+                    id = "pizza-pepperoni",
+                    name = "Pepperoni Pizza",
+                    priceCents = 1_790,
+                    imageUrl = "https://images.unsplash.com/photo-1564249484723-8303f8ee99e4?auto=format&fit=crop&w=800&h=600&q=80",
+                ),
+                // Anhelina Vasylyk: https://www.pexels.com/photo/rustic-four-cheese-pizza-on-wooden-table-33592983/
+                menu(
+                    id = "pizza-cheese",
+                    name = "Four Cheese Pizza",
+                    priceCents = 1_890,
+                    imageUrl = "https://images.pexels.com/photos/33592983/pexels-photo-33592983.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
+                // Amit Fulwaria: https://www.pexels.com/photo/top-view-of-a-pizza-on-a-wooden-cutting-board-20115309/
+                menu(
+                    id = "pizza-hawaiian",
+                    name = "Hawaiian Pizza",
+                    priceCents = 1_750,
+                    imageUrl = "https://images.pexels.com/photos/20115309/pexels-photo-20115309.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
+                // Foad Roshan: https://unsplash.com/photos/a-close-up-of-a-pizza-with-meat-and-cheese-QRUFgHHd2F8
+                menu(
+                    id = "pizza-bulgogi",
+                    name = "Beef & Mushroom Pizza",
+                    priceCents = 1_990,
+                    imageUrl = "https://images.unsplash.com/photo-1719467297742-ab5665fd5d2e?auto=format&fit=crop&w=800&h=600&q=80",
+                ),
+                // esrannuur: https://www.pexels.com/photo/a-pizza-with-potato-and-cheese-toppings-on-the-table-13599446/
+                menu(
+                    id = "pizza-potato",
+                    name = "Potato & Cheese Pizza",
+                    priceCents = 1_950,
+                    imageUrl = "https://images.pexels.com/photos/13599446/pexels-photo-13599446.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600&crop=bottom",
+                ),
             ),
         ),
         Category(
             id = "pasta",
-            name = "파스타",
+            name = "Pasta",
             menuList = listOf(
-                menu("pasta-tomato", "토마토 해산물 파스타", 14_900, PASTA_IMAGE_URL),
-                menu("pasta-carbonara", "베이컨 까르보나라", 15_900, PASTA_IMAGE_URL),
-                menu("pasta-rose", "쉬림프 로제 파스타", 16_900, PASTA_IMAGE_URL),
-                menu("pasta-aglio", "알리오 올리오", 13_900, PASTA_IMAGE_URL),
-                menu("pasta-ragu", "볼로네제 라구 파스타", 16_500, PASTA_IMAGE_URL),
-                menu("pasta-vongole", "봉골레 파스타", 15_900, PASTA_IMAGE_URL),
+                // Nadin Sh: https://www.pexels.com/photo/pasta-with-mussels-prawns-and-tomato-sauce-10895785/
+                menu(
+                    id = "pasta-tomato",
+                    name = "Seafood Tomato Pasta",
+                    priceCents = 1_490,
+                    imageUrl = "https://images.pexels.com/photos/10895785/pexels-photo-10895785.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
+                // Helen Van: https://unsplash.com/photos/a-plate-of-pasta-with-bacon-on-it-bYSvpF8NBmE
+                menu(
+                    id = "pasta-carbonara",
+                    name = "Bacon Carbonara",
+                    priceCents = 1_590,
+                    imageUrl = "https://images.unsplash.com/photo-1683827449087-ccf5a9e6283c?auto=format&fit=crop&w=800&h=600&q=80",
+                ),
+                // solod_sha: https://www.pexels.com/photo/pasta-on-white-ceramic-plate-7664088/
+                menu(
+                    id = "pasta-rose",
+                    name = "Creamy Shrimp Pasta",
+                    priceCents = 1_690,
+                    imageUrl = "https://images.pexels.com/photos/7664088/pexels-photo-7664088.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
+                // adrian vieriu: https://www.pexels.com/photo/spaghetti-aglio-e-olio-with-chopped-basil-on-white-plate-11654236/
+                menu(
+                    id = "pasta-aglio",
+                    name = "Aglio e Olio",
+                    priceCents = 1_390,
+                    imageUrl = "https://images.pexels.com/photos/11654236/pexels-photo-11654236.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
+                // Klaus Nielsen: https://www.pexels.com/photo/appetizing-spaghetti-pasta-with-bolognese-sauce-served-in-kitchen-6287520/
+                menu(
+                    id = "pasta-ragu",
+                    name = "Bolognese Pasta",
+                    priceCents = 1_650,
+                    imageUrl = "https://images.pexels.com/photos/6287520/pexels-photo-6287520.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
+                // Nadin Sh: https://www.pexels.com/photo/pasta-dish-with-mussels-17243892/
+                menu(
+                    id = "pasta-vongole",
+                    name = "Vongole Pasta",
+                    priceCents = 1_590,
+                    imageUrl = "https://images.pexels.com/photos/17243892/pexels-photo-17243892.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
             ),
         ),
         Category(
             id = "salad",
-            name = "샐러드",
+            name = "Salads",
             menuList = listOf(
-                menu("salad-caesar", "그릴드 치킨 시저 샐러드", 10_900, SALAD_IMAGE_URL),
-                menu("salad-ricotta", "리코타 치즈 샐러드", 11_900, SALAD_IMAGE_URL),
-                menu("salad-avocado", "아보카도 콥 샐러드", 12_900, SALAD_IMAGE_URL),
-                menu("salad-shrimp", "갈릭 쉬림프 샐러드", 13_500, SALAD_IMAGE_URL),
-                menu("salad-salmon", "훈제 연어 샐러드", 14_900, SALAD_IMAGE_URL),
-                menu("salad-tofu", "구운 두부 샐러드", 9_900, SALAD_IMAGE_URL),
+                // Julia Filirovska: https://www.pexels.com/photo/close-up-of-a-salad-with-chicken-8251536/
+                menu(
+                    id = "salad-caesar",
+                    name = "Chicken Caesar Salad",
+                    priceCents = 1_090,
+                    imageUrl = "https://images.pexels.com/photos/8251536/pexels-photo-8251536.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
+                // Nadin Sh: https://www.pexels.com/photo/delicious-cream-with-tomatoes-on-plate-16854488/
+                menu(
+                    id = "salad-ricotta",
+                    name = "Tomato & Ricotta Salad",
+                    priceCents = 1_190,
+                    imageUrl = "https://images.pexels.com/photos/16854488/pexels-photo-16854488.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
+                // dytmeri: https://www.pexels.com/photo/fresh-salad-bowl-with-avocado-and-poached-egg-28508745/
+                menu(
+                    id = "salad-avocado",
+                    name = "Avocado & Egg Salad",
+                    priceCents = 1_290,
+                    imageUrl = "https://images.pexels.com/photos/28508745/pexels-photo-28508745.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
+                // Ayat Shahin: https://www.pexels.com/photo/shrimp-salad-27863236/
+                menu(
+                    id = "salad-shrimp",
+                    name = "Grilled Shrimp Salad",
+                    priceCents = 1_350,
+                    imageUrl = "https://images.pexels.com/photos/27863236/pexels-photo-27863236.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
+                // Change C.C: https://www.pexels.com/photo/close-up-of-a-salad-with-salmon-20150371/
+                menu(
+                    id = "salad-salmon",
+                    name = "Smoked Salmon Salad",
+                    priceCents = 1_490,
+                    imageUrl = "https://images.pexels.com/photos/20150371/pexels-photo-20150371.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
+                // Aveedibya Dey: https://unsplash.com/photos/a-plate-of-food-IhzS6pOVrRE
+                menu(
+                    id = "salad-tofu",
+                    name = "Grilled Tofu Salad",
+                    priceCents = 990,
+                    imageUrl = "https://images.unsplash.com/photo-1664681340334-5e45eae48e4e?auto=format&fit=crop&w=800&h=600&q=80",
+                ),
             ),
         ),
         Category(
             id = "side",
-            name = "사이드",
+            name = "Sides",
             menuList = listOf(
-                menu("side-fries", "프렌치프라이", 4_500, SIDE_IMAGE_URL),
-                menu("side-cheese-fries", "치즈 프라이", 5_900, SIDE_IMAGE_URL),
-                menu("side-onion-ring", "어니언링", 5_500, SIDE_IMAGE_URL),
-                menu("side-chicken", "크리스피 치킨", 7_900, SIDE_IMAGE_URL),
-                menu("side-wings", "버팔로 윙", 8_900, SIDE_IMAGE_URL),
-                menu("side-garlic-bread", "갈릭 브레드", 4_900, SIDE_IMAGE_URL),
+                // Aleks Magnusson: https://www.pexels.com/photo/macro-photography-of-french-fries-2962450/
+                menu(
+                    id = "side-fries",
+                    name = "French Fries",
+                    priceCents = 450,
+                    imageUrl = "https://images.pexels.com/photos/2962450/pexels-photo-2962450.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
+                // Valeria Boltneva: https://www.pexels.com/photo/fries-in-melted-cheese-17035133/
+                menu(
+                    id = "side-cheese-fries",
+                    name = "Cheese Fries",
+                    priceCents = 590,
+                    imageUrl = "https://images.pexels.com/photos/17035133/pexels-photo-17035133/free-photo-of-fries-in-melted-cheese.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
+                // Ron Lach: https://www.pexels.com/photo/onion-rings-in-close-up-photography-8880734/
+                menu(
+                    id = "side-onion-ring",
+                    name = "Onion Rings",
+                    priceCents = 550,
+                    imageUrl = "https://images.pexels.com/photos/8880734/pexels-photo-8880734.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600&crop=bottom",
+                ),
+                // Robert Moutongoh: https://www.pexels.com/photo/pieces-of-crispy-fried-chicken-in-close-up-shot-8919199/
+                menu(
+                    id = "side-chicken",
+                    name = "Crispy Chicken",
+                    priceCents = 790,
+                    imageUrl = "https://images.pexels.com/photos/8919199/pexels-photo-8919199.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
+                // Scott Eckersley: https://unsplash.com/photos/fried-chicken-on-black-plate-R-7_ErUOLxw
+                menu(
+                    id = "side-wings",
+                    name = "Buffalo Wings",
+                    priceCents = 890,
+                    imageUrl = "https://images.unsplash.com/photo-1608039755401-742074f0548d?auto=format&fit=crop&w=800&h=600&q=80&crop=bottom",
+                ),
+                // Ilo Frey: https://www.pexels.com/photo/close-up-of-freshly-baked-garlic-bread-loaves-37043987/
+                menu(
+                    id = "side-garlic-bread",
+                    name = "Garlic Bread",
+                    priceCents = 490,
+                    imageUrl = "https://images.pexels.com/photos/37043987/pexels-photo-37043987/free-photo-of-close-up-of-freshly-baked-garlic-bread-loaves.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
             ),
         ),
         Category(
             id = "dessert",
-            name = "디저트",
+            name = "Desserts",
             menuList = listOf(
-                menu("dessert-cheesecake", "뉴욕 치즈케이크", 6_900, DESSERT_IMAGE_URL),
-                menu("dessert-chocolate", "초콜릿 브라우니", 6_500, DESSERT_IMAGE_URL),
-                menu("dessert-tiramisu", "클래식 티라미수", 7_500, DESSERT_IMAGE_URL),
-                menu("dessert-ice-cream", "바닐라 아이스크림", 4_900, DESSERT_IMAGE_URL),
-                menu("dessert-croffle", "메이플 크로플", 7_900, DESSERT_IMAGE_URL),
-                menu("dessert-pancake", "베리 팬케이크", 8_500, DESSERT_IMAGE_URL),
+                // Yulia Khlebnikova: https://unsplash.com/photos/cheesecake-with-pink-toppings-FDYbS43jUrU
+                menu(
+                    id = "dessert-cheesecake",
+                    name = "New York Cheesecake",
+                    priceCents = 690,
+                    imageUrl = "https://images.unsplash.com/photo-1578775887804-699de7086ff9?auto=format&fit=crop&w=800&h=600&q=80",
+                ),
+                // Jade Wulfraat: https://unsplash.com/photos/square-brown-nut-cake-on-black-baking-pan-fVpY6vK9Luo
+                menu(
+                    id = "dessert-chocolate",
+                    name = "Walnut Brownie",
+                    priceCents = 650,
+                    imageUrl = "https://images.unsplash.com/photo-1464196209402-a16825eb34f9?auto=format&fit=crop&w=800&h=600&q=80",
+                ),
+                // You Le: https://unsplash.com/photos/a-slice-of-tiramisu-dusted-with-cocoa-powder-M8eoHveep-8
+                menu(
+                    id = "dessert-tiramisu",
+                    name = "Classic Tiramisu",
+                    priceCents = 750,
+                    imageUrl = "https://images.unsplash.com/photo-1774428755024-88024a28223c?auto=format&fit=crop&w=800&h=600&q=80",
+                ),
+                // Electra Studio: https://www.pexels.com/photo/vanilla-ice-cream-in-glass-dish-on-red-background-30649019/
+                menu(
+                    id = "dessert-ice-cream",
+                    name = "Vanilla Ice Cream",
+                    priceCents = 490,
+                    imageUrl = "https://images.pexels.com/photos/30649019/pexels-photo-30649019/free-photo-of-vanilla-ice-cream-in-glass-dish-on-red-background.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
+                // Axel Bimashanda: https://unsplash.com/photos/a-waffle-covered-in-syrup-sitting-on-top-of-a-white-plate-XwZ9nqAFoh8
+                menu(
+                    id = "dessert-croffle",
+                    name = "Syrup Croffle",
+                    priceCents = 790,
+                    imageUrl = "https://images.unsplash.com/photo-1634481568985-0a118f0ac531?auto=format&fit=crop&w=800&h=600&q=80",
+                ),
+                // Anna Tukhfatullina: https://unsplash.com/photos/pancake-with-strawberry-and-blue-berry-71exsgFy6CI
+                menu(
+                    id = "dessert-pancake",
+                    name = "Berry Cheese Pancakes",
+                    priceCents = 850,
+                    imageUrl = "https://images.unsplash.com/photo-1565592826255-e4a6946f5706?auto=format&fit=crop&w=800&h=600&q=80",
+                ),
             ),
         ),
         Category(
             id = "beverage",
-            name = "음료",
+            name = "Drinks",
             menuList = listOf(
-                menu("beverage-cola", "콜라", 2_500, BEVERAGE_IMAGE_URL),
-                menu("beverage-zero-cola", "제로 콜라", 2_500, BEVERAGE_IMAGE_URL),
-                menu("beverage-lemonade", "수제 레몬에이드", 5_500, BEVERAGE_IMAGE_URL),
-                menu("beverage-grapefruit", "자몽에이드", 5_500, BEVERAGE_IMAGE_URL),
-                menu("beverage-americano", "아메리카노", 4_000, BEVERAGE_IMAGE_URL),
-                menu("beverage-beer", "논알코올 맥주", 5_900, BEVERAGE_IMAGE_URL),
+                // Edge2Edge Media: https://unsplash.com/photos/clear-drinking-glass-with-ice-and-red-straw-0KxfiWujzyY/
+                menu(
+                    id = "beverage-cola",
+                    name = "Cola",
+                    priceCents = 250,
+                    imageUrl = "https://images.unsplash.com/photo-1605712916345-6ef6bcc2e29c?auto=format&fit=crop&w=800&h=600&q=80",
+                ),
+                // Ron Lach: https://www.pexels.com/photo/a-glass-of-iced-cola-8879617/
+                menu(
+                    id = "beverage-zero-cola",
+                    name = "Iced Cola",
+                    priceCents = 250,
+                    imageUrl = "https://images.pexels.com/photos/8879617/pexels-photo-8879617.jpeg?auto=compress&cs=tinysrgb&fit=crop&w=800&h=600",
+                ),
+                // Rémy Golinelli: https://unsplash.com/photos/a-tall-glass-of-lemonade-with-mint-and-lemon-DTlDH3jF89k
+                menu(
+                    id = "beverage-lemonade",
+                    name = "House Lemonade",
+                    priceCents = 550,
+                    imageUrl = "https://images.unsplash.com/photo-1763379978357-482f322c93f5?auto=format&fit=crop&w=800&h=600&q=80",
+                ),
+                // Photo Tora: https://unsplash.com/photos/refreshing-grapefruit-drink-on-a-wooden-tray-Xf6Uc2rHp74
+                menu(
+                    id = "beverage-grapefruit",
+                    name = "Grapefruit Soda",
+                    priceCents = 550,
+                    imageUrl = "https://images.unsplash.com/photo-1752550901046-ad49e6063dd7?auto=format&fit=crop&w=800&h=600&q=80",
+                ),
+                // Gerson Cifuentes: https://unsplash.com/photos/white-coffee-cup-on-brown-wooden-table-JNhaaPEz3FY
+                menu(
+                    id = "beverage-americano",
+                    name = "Americano",
+                    priceCents = 400,
+                    imageUrl = "https://images.unsplash.com/photo-1551030173-122aabc4489c?auto=format&fit=crop&w=800&h=600&q=80",
+                ),
+                // Matt Palmer: https://unsplash.com/photos/clear-drinking-glass-with-beer-lGzhgzkN6UI
+                menu(
+                    id = "beverage-beer",
+                    name = "Draft Beer",
+                    priceCents = 590,
+                    imageUrl = "https://images.unsplash.com/photo-1581457954431-18ef26091378?auto=format&fit=crop&w=800&h=600&q=80",
+                ),
             ),
         ),
     )
@@ -110,7 +349,7 @@ internal object SampleMenuDataSource {
     val primaryCategories: List<PrimaryCategory> = listOf(
         PrimaryCategory(
             id = "main-dish",
-            name = "메인 메뉴",
+            name = "Main Dishes",
             subCategories = selectCategories(
                 "burger",
                 "pizza",
@@ -119,7 +358,7 @@ internal object SampleMenuDataSource {
         ),
         PrimaryCategory(
             id = "light-meal",
-            name = "라이트 메뉴",
+            name = "Light Bites",
             subCategories = selectCategories(
                 "salad",
                 "side",
@@ -127,7 +366,7 @@ internal object SampleMenuDataSource {
         ),
         PrimaryCategory(
             id = "cafe",
-            name = "디저트와 음료",
+            name = "Desserts & Drinks",
             subCategories = selectCategories(
                 "dessert",
                 "beverage",
@@ -147,12 +386,12 @@ internal object SampleMenuDataSource {
     private fun menu(
         id: String,
         name: String,
-        price: Int,
+        priceCents: Int,
         imageUrl: String,
     ): Menu = Menu(
         id = id,
         name = name,
-        price = price,
+        priceCents = priceCents,
         imageUrl = imageUrl,
     )
 }
