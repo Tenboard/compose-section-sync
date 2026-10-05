@@ -1,19 +1,24 @@
 package io.github.tenboard.composesectionsync.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.github.tenboard.composesectionsync.data.local.SampleMenuDataSource
+import io.github.tenboard.composesectionsync.ui.component.AppHeader
+import io.github.tenboard.composesectionsync.ui.component.MenuGridHeader
 import io.github.tenboard.composesectionsync.ui.component.MenuGridItem
 import io.github.tenboard.composesectionsync.ui.component.PrimaryCategoryTabRow
 import io.github.tenboard.composesectionsync.ui.component.SecondaryCategoryTabRow
@@ -69,6 +74,8 @@ fun MenuSampleScreen() {
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
+        AppHeader()
+
         PrimaryCategoryTabRow(
             categories = primaryCategories,
             selectedTabIndex = primaryCategoryIndex,
@@ -112,11 +119,18 @@ fun MenuSampleScreen() {
             modifier = Modifier.weight(1f),
             state = gridState,
             columns = GridCells.Fixed(2),
-            contentPadding = PaddingValues(10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             data.categories.forEach { category ->
+                item(
+                    key = "header:${category.id}",
+                    span = { GridItemSpan(maxLineSpan) }
+                ) {
+                    MenuGridHeader(category)
+                }
+
                 items(
                     items = category.menuList,
                     key = { menu -> menu.id },
@@ -144,7 +158,9 @@ private fun getAnchors(): List<SectionAnchor<String>> {
                     firstItemIndex = firstItemIndex,
                 )
             )
-            firstItemIndex += category.menuList.size
+
+            // Add header index
+            firstItemIndex += 1 + category.menuList.size
         }
     }
 
@@ -153,3 +169,4 @@ private fun getAnchors(): List<SectionAnchor<String>> {
 
 private const val PRIMARY_CATEGORY_LEVEL = 0
 private const val SECONDARY_CATEGORY_LEVEL = 1
+
