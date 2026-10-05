@@ -6,6 +6,10 @@ section-based tabs and `LazyVerticalGrid` scrolling.
 > 🚧 This project is in early development.
 > No stable artifact has been published yet.
 
+| Tab → Section | Scroll → Tabs |
+| :---: | :---: |
+| <img src="https://github.com/user-attachments/assets/a936bf3b-b6bf-480f-9225-1196b760bfa2" width="240" alt="Tab to section"> | <img src="https://github.com/user-attachments/assets/174bdf9f-b913-458e-8a0b-fc8c98849794" width="240" alt="Scroll to tabs"> |
+
 ## Compatibility
 
 The `0.1.0-alpha05` build uses the following baseline:
