@@ -41,9 +41,12 @@ fun PrimaryCategoryTabRow(
         contentColor = selectedColor,
         edgePadding = 12.dp,
         indicator = { tabPositions ->
+            val selectedTabPosition = tabPositions.getOrNull(selectedIndex)
+                ?: return@SecondaryScrollableTabRow
+
             Box(
                 modifier = Modifier
-                    .tabIndicatorOffset(tabPositions[selectedIndex])
+                    .tabIndicatorOffset(selectedTabPosition)
                     .padding(horizontal = 16.dp)
                     .height(3.dp)
                     .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
