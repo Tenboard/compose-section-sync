@@ -2,6 +2,7 @@ package io.github.tenboard.composesectionsync.ui.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -28,32 +29,36 @@ fun ComposeSectionSyncTabRow(
 ) {
     val selectedColor = MaterialTheme.colorScheme.primary
 
-    SecondaryScrollableTabRow(
-        selectedTabIndex = selectedIndex,
-        modifier = modifier.fillMaxWidth(),
-        containerColor = MaterialTheme.colorScheme.surface,
-        contentColor = selectedColor,
-        edgePadding = 12.dp,
-        indicator = { tabPositions ->
-            val selectedTabPosition = tabPositions.getOrNull(selectedIndex)
-                ?: return@SecondaryScrollableTabRow
+    Column {
+        SecondaryScrollableTabRow(
+            selectedTabIndex = selectedIndex,
+            modifier = modifier.fillMaxWidth(),
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = selectedColor,
+            edgePadding = 12.dp,
+            indicator = { tabPositions ->
+                val selectedTabPosition = tabPositions.getOrNull(selectedIndex)
+                    ?: return@SecondaryScrollableTabRow
 
-            Box(
-                modifier = Modifier
-                    .tabIndicatorOffset(selectedTabPosition)
-                    .padding(horizontal = 16.dp)
-                    .height(3.dp)
-                    .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
-                    .background(selectedColor),
-            )
-        },
-        divider = {
-            HorizontalDivider(
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
-            )
-        },
-    ) {
-        tabs()
+                Box(
+                    modifier = Modifier
+                        .tabIndicatorOffset(selectedTabPosition)
+                        .padding(horizontal = 16.dp)
+                        .height(3.dp)
+                        .clip(RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp))
+                        .background(selectedColor),
+                )
+            },
+            divider = {
+
+            },
+        ) {
+            tabs()
+        }
+
+        HorizontalDivider(
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f),
+        )
     }
 }
 
