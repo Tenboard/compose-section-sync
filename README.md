@@ -1,219 +1,148 @@
 # Compose Section Sync
 
-A Jetpack Compose library for bidirectional synchronization between
-section-based tabs and `LazyVerticalGrid` scrolling.
+A Jetpack Compose library that keeps section tabs and `LazyVerticalGrid`
+scrolling in sync in both directions.
 
-> 🚧 This project is in early development.
-> No stable artifact has been published yet.
+> Beta: the public API may change before a stable release.
 
 | Tab → Section | Scroll → Tabs |
 | :---: | :---: |
 | <img src="https://github.com/user-attachments/assets/174bdf9f-b913-458e-8a0b-fc8c98849794" width="240" alt="Tab to section"> | <img src="https://github.com/user-attachments/assets/a936bf3b-b6bf-480f-9225-1196b760bfa2" width="240" alt="Scroll to tabs"> |
 
-## Compatibility
+## Installation
 
-The `0.1.0-alpha05` build uses the following baseline:
-
-| Component | Version |
-| --- | --- |
-| Android minimum SDK | 21 |
-| Android compile SDK | 34 |
-| Compose Foundation / Runtime | 1.6.8 |
-| Kotlin | 2.0.21 |
-| Compose Compiler Gradle plugin | 2.0.21 |
-| Coroutines | 1.8.1 |
-| JVM bytecode target | 11 |
-
-Build this repository with JDK 17, Gradle 8.11.1, and Android Gradle Plugin 8.10.1.
-The sample uses compile SDK 36; the library keeps compile SDK 34 and the
-dependency baseline above. These build-tool versions describe this repository;
-consuming apps use their own build tools.
-
-Kotlin 2.0 is the minimum supported compiler line from `alpha05`. Both the
-library and sample use Kotlin 2.0.21 with the matching
-`org.jetbrains.kotlin.plugin.compose` plugin. `alpha04` retains the previous
-Kotlin 1.9.25 baseline.
-
-This AGP/Gradle combination is newer than Kotlin 2.0.21's fully supported
-toolchain range, so compatibility must be checked when changing build tools.
-
-The library declares Foundation and Runtime as API dependencies and Coroutines
-as an implementation dependency. It does not publish a Compose BOM constraint
-or depend directly on Material3, AppCompat, Material Components, Core KTX, or
-preview tooling. Compose UI and other dependencies required by Foundation are
-still included transitively. Apps can select newer compatible versions through
-their own dependency management.
-
-To build and generate the local Maven repository:
-
-```shell
-./gradlew :section-sync:assembleRelease :app:assembleDebug \
-    :section-sync:publishReleasePublicationToTransferRepository
-```
-
-The repository is written to `section-sync/build/maven-repository`. Register
-that directory as a Maven repository in the consuming app and use:
+Configure `google()` and `mavenCentral()` in your project's repositories, then add:
 
 ```kotlin
-implementation("io.github.tenboard:compose-section-sync:0.1.0-alpha05")
+implementation("io.github.tenboard:compose-section-sync:0.1.0-beta01")
 ```
 
-This version has a separate Maven coordinate from `alpha04`; do not overwrite
-the earlier artifact when transferring a build to another project.
+## Compatibility
 
-## Motivation
+- Android: API 21 or higher.
+- Kotlin / Compose Compiler build baseline: 2.0.21.
 
-Jetpack Compose provides low-level scrolling and layout information through
-`LazyGridState`, but coordinating a section-based tab UI with a
-`LazyVerticalGrid` requires additional state and synchronization logic.
-
-This project aims to provide reusable state and APIs for:
-
-- Updating the active section while the user scrolls the grid
-- Scrolling the grid when the user selects a section
-- Handling conflicts between user scrolling and programmatic scrolling
-- Supporting grids with multiple columns and fully loaded section data
-
-## Initial Scope
-
-The first alpha version will support:
-
-- `LazyVerticalGrid`
-- Key-based sections
-- Grid-to-section synchronization
-- Section-to-grid scrolling
-- Immediate and animated scrolling
-- End-of-list section resolution
-- Programmatic scroll conflict handling
+For Kotlin 2.0+ projects, use the
+[Compose Compiler Gradle plugin](https://developer.android.com/develop/ui/compose/setup-compose-dependencies-and-compiler)
+with the same version as your project's Kotlin plugin.
 
 ## Usage
 
-Define each section with stable keys in parent-to-child order and connect the
-path to the first item index of that section.
-Anchor indices must be non-negative and strictly increasing, and paths must be
-unique. Invalid mappings throw `IllegalArgumentException`. Omit sections with no
-rendered items; an empty anchor list is allowed and clears the active path.
+Map each section to its first grid item and share the same `LazyGridState`
+between the library and the grid. This example has 40 items in two sections,
+starting at indices 0 and 20.
 
 ```kotlin
-val anchors = listOf(
-    SectionAnchor(
-        path = SectionPath.of("food", "korean"),
-        firstItemIndex = 0,
-    ),
-    SectionAnchor(
-        path = SectionPath.of("food", "western"),
-        firstItemIndex = 12,
-    ),
-    SectionAnchor(
-        path = SectionPath.of("drink", "coffee"),
-        firstItemIndex = 24,
-    ),
-)
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import io.github.tenboard.section_sync.SectionAnchor
+import io.github.tenboard.section_sync.SectionPath
+import io.github.tenboard.section_sync.activeKeyAtOrNull
+import io.github.tenboard.section_sync.rememberSectionSyncState
+import kotlinx.coroutines.launch
 
-val gridState = rememberLazyGridState()
-val coroutineScope = rememberCoroutineScope()
-val sectionSyncState = rememberSectionSyncState(
-    anchors = anchors,
-    gridState = gridState,
-)
-```
+@Composable
+fun SectionGrid() {
+    val anchors = remember {
+        listOf(
+            SectionAnchor(SectionPath.of("Food"), firstItemIndex = 0),
+            SectionAnchor(SectionPath.of("Drinks"), firstItemIndex = 20),
+        )
+    }
+    val gridState = rememberLazyGridState()
+    val scope = rememberCoroutineScope()
+    val syncState = rememberSectionSyncState(anchors, gridState)
+    val activeKey = syncState.activeKeyAtOrNull(level = 0)
 
-When generating anchors, skip empty sections. For example, if the grid renders
-only the following items in section order (without separate header items):
-
-```kotlin
-val sections = listOf(
-    SectionPath.of("food", "korean") to listOf("Bibimbap", "Bulgogi"),
-    SectionPath.of("food", "western") to emptyList<String>(),
-    SectionPath.of("drink", "coffee") to listOf("Americano"),
-)
-val anchors = buildList {
-    var firstItemIndex = 0
-    for ((path, items) in sections) {
-        if (items.isNotEmpty()) {
-            add(SectionAnchor(path, firstItemIndex))
+    Column(Modifier.fillMaxSize()) {
+        Row {
+            anchors.forEach { anchor ->
+                val label = anchor.path.keyAtOrNull(0).orEmpty()
+                val selected = activeKey == label
+                BasicText(
+                    text = label,
+                    style = TextStyle(
+                        fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                    ),
+                    modifier = Modifier.selectable(
+                        selected = selected,
+                        role = Role.Tab,
+                        onClick = {
+                            scope.launch {
+                                syncState.animateScrollToSection(anchor.path)
+                            }
+                        },
+                    ).padding(12.dp),
+                )
+            }
         }
-        firstItemIndex += items.size
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            state = gridState,
+            modifier = Modifier.weight(1f),
+        ) {
+            items(40) { index ->
+                BasicText("Item $index", Modifier.padding(16.dp))
+            }
+        }
     }
 }
-// Only korean (index 0) and coffee (index 2) have anchors.
 ```
 
-Count every rendered grid item, including headers if present, when calculating
-indices. Anchor paths and keys must remain immutable. Replacing the mapping
-cancels the current section scroll request without automatically restarting it.
+For nested categories, use `SectionPath.of(parentKey, childKey)` and read the
+active keys with `activeKeyAtOrNull(0)` and `activeKeyAtOrNull(1)`.
+Use `scrollToSection(path)` instead of `animateScrollToSection(path)` for an
+immediate jump. Call either from a Compose coroutine scope, as above.
 
-Read the active key at any category level.
+## Usage rules and limitations
 
-```kotlin
-private const val PRIMARY_CATEGORY_LEVEL = 0
-private const val SECONDARY_CATEGORY_LEVEL = 1
+- Each anchor must point to an existing grid item. Count headers and other
+  rendered items too; an index is an item position, not a row number.
+- Anchor indices must be non-negative and strictly increasing, and paths must
+  be unique. Invalid mappings throw `IllegalArgumentException`.
+- Omit sections with no rendered items. Active-key lookups may return `null`
+  when there is no active section or the requested path level does not exist.
+- Keep paths and keys immutable. Replace the anchor list when the item mapping
+  changes; this cancels any current section scroll request.
+- Only `LazyVerticalGrid` is supported. `LazyColumn`, `LazyHorizontalGrid`,
+  reverse layout, unloaded Paging sections, and Compose Multiplatform are not
+  supported.
 
-val primaryCategoryKey =
-    sectionSyncState.activeKeyAtOrNull(PRIMARY_CATEGORY_LEVEL)
+## Options
 
-val secondaryCategoryKey =
-    sectionSyncState.activeKeyAtOrNull(SECONDARY_CATEGORY_LEVEL)
-```
+Pass `sectionSyncOptions = SectionSyncOptions(...)` to `rememberSectionSyncState`
+to customize these defaults:
 
-Scroll to an exact section path.
-
-```kotlin
-coroutineScope.launch {
-    sectionSyncState.animateScrollToSection(
-        SectionPath.of("drink", "coffee"),
-    )
-}
-```
-
-## Selection policies
-
-Pass `SectionSyncOptions` to `rememberSectionSyncState` to configure selection.
-
-| Option | Default | Behavior |
+| Option | Default | Default behavior |
 | --- | --- | --- |
-| `shortContentSelection` | `FirstAnchor` | Selection when neither scroll direction is available. |
-| `endOfContentSelection` | `LastAnchor` | Selection at the end of otherwise scrollable content. |
-| `selectionAfterScroll` | `KeepRequestedUntilPositionChanges` | Selection after a successful section scroll. |
+| `ongoingScrollBehavior` | `InterruptAndProceed` | Stop the current scroll and perform the new request. |
+| `shortContentSelection` | `FirstAnchor` | Select the first section when the grid cannot scroll in either direction. |
+| `endOfContentSelection` | `LastAnchor` | Select the last section at the end of scrollable content. |
+| `selectionAfterScroll` | `KeepRequestedUntilPositionChanges` | Keep the requested section selected after a successful scroll until the viewport position changes. |
 
-Both boundary options accept `FirstAnchor`, `LastAnchor`, or `FollowViewport`.
-`FollowViewport` selects the last anchor at or before the first visible item;
-it returns no selection if that item precedes the first anchor. Short-content
-policy takes precedence over end-of-content policy.
+See [SectionSyncOptions](section-sync/src/main/java/io/github/tenboard/section_sync/SectionSyncOptions.kt)
+for alternative values and detailed behavior.
 
-After a successful request, `KeepRequestedUntilPositionChanges` retains the
-requested path until the first visible item index or its scroll offset changes.
-This preserves tab selection when the requested item shares a row or cannot be
-aligned at the top. A new request replaces the retained selection. Cancelled or
-discarded requests are not retained. `FollowViewport` instead re-evaluates the
-current viewport and boundary policies when the request ends, even if the
-scroll position did not change.
+## Sample
 
-Changing anchors or any selection policy clears retained selection and
-re-evaluates the viewport. During a section scroll, viewport selection resumes
-when the request ends; the latest selection policies then apply. No anchors or
-no visible items means no active path.
+See [MenuSampleScreen](app/src/main/java/io/github/tenboard/composesectionsync/ui/MenuSampleScreen.kt)
+for a complete example with nested categories and section headers.
 
-The existing `ongoingScrollBehavior` is captured when a request starts.
-`InterruptAndProceed` stops the current scroll and proceeds with the request;
-subsequent user input can still cancel the movement. `InterruptAndDiscardRequest`
-stops the current scroll and discards the new request.
+## License
 
-## Non-goals
-
-The first alpha version will not support:
-
-- `LazyHorizontalGrid`
-- `LazyColumn`
-- Paging-based unloaded sections
-- Compose Multiplatform
-- Reverse layout
-
-## Project Structure
-
-- `section-sync`: Android library module
-- `app`: Sample application
-
-## Status
-
-The public API is under design and may change without notice.
+[MIT License](LICENSE).

@@ -4,7 +4,8 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
-    `maven-publish`
+    id("com.vanniktech.maven.publish.base") version "0.34.0"
+    signing
 }
 
 android {
@@ -27,6 +28,7 @@ android {
     publishing {
         singleVariant("release") {
             withSourcesJar()
+            withJavadocJar()
         }
     }
 }
@@ -40,10 +42,6 @@ kotlin {
 publishing {
     publications {
         register<MavenPublication>("release") {
-            groupId = "io.github.tenboard"
-            artifactId = "compose-section-sync"
-            version = "0.1.0-alpha05"
-
             afterEvaluate {
                 from(components["release"])
             }
@@ -58,6 +56,53 @@ publishing {
             )
         }
     }
+}
+
+mavenPublishing {
+    coordinates("io.github.tenboard", "compose-section-sync", "0.1.0-beta01")
+    publishToMavenCentral(automaticRelease = false)
+    signAllPublications()
+
+    pom {
+        name.set("Compose Section Sync")
+        description.set("Bidirectional synchronization between section tabs and Jetpack Compose LazyVerticalGrid scrolling.")
+        url.set("https://github.com/Tenboard/compose-section-sync")
+        licenses {
+            license {
+                name.set("MIT License")
+                url.set("https://opensource.org/license/mit")
+                distribution.set("repo")
+            }
+        }
+        developers {
+            developer {
+                id.set("Tenboard")
+                name.set("Tenboard")
+                url.set("https://github.com/Tenboard")
+            }
+        }
+        scm {
+            url.set("https://github.com/Tenboard/compose-section-sync")
+            connection.set("scm:git:https://github.com/Tenboard/compose-section-sync.git")
+            developerConnection.set("scm:git:ssh://git@github.com/Tenboard/compose-section-sync.git")
+        }
+    }
+}
+
+signing {
+    useGpgCmd()
+}
+
+tasks.withType<Zip>().matching {
+    it.name in setOf("bundleReleaseAar", "sourceReleaseJar", "javaDocReleaseJar")
+}.configureEach {
+    from(rootProject.file("LICENSE")) {
+        into("META-INF/compose-section-sync")
+    }
+}
+
+tasks.withType<Jar>().matching { it.name == "javaDocReleaseJar" }.configureEach {
+    from(rootProject.file("README.md"))
 }
 
 dependencies {
