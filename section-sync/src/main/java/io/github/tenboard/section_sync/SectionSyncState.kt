@@ -66,8 +66,6 @@ internal class DefaultSectionSyncState<K : Any>(
     var isProgrammaticScroll by mutableStateOf(false)
         private set
 
-    private var latestScrollRequestId: Long = 0L
-
     fun gridSnapshot() = GridSnapshot(
         anchors = anchors,
         hasVisibleItems = gridState.layoutInfo.visibleItemsInfo.isNotEmpty(),
@@ -140,7 +138,6 @@ internal class DefaultSectionSyncState<K : Any>(
     }
 
     private fun cancelScrollRequest() {
-        latestScrollRequestId++
         activeScrollJob?.cancel()
     }
 
@@ -162,7 +159,6 @@ internal class DefaultSectionSyncState<K : Any>(
             return@coroutineScope
         }
 
-        val requestId = ++latestScrollRequestId
         val wasScrolling = gridState.isScrollInProgress
         val scrollBehavior = sectionSyncOptions.ongoingScrollBehavior
         val previousJob = activeScrollJob
@@ -192,7 +188,7 @@ internal class DefaultSectionSyncState<K : Any>(
             }
 
             ensureActive()
-            if (isDisposed || requestId != latestScrollRequestId) {
+            if (isDisposed) {
                 return@coroutineScope
             }
 
@@ -210,7 +206,7 @@ internal class DefaultSectionSyncState<K : Any>(
             if (activeScrollJob === requestJob) {
                 activeScrollJob = null
                 isProgrammaticScroll = false
-                if (completed && requestId == latestScrollRequestId && !isDisposed &&
+                if (completed && !isDisposed &&
                     sectionSyncOptions.selectionAfterScroll ==
                     SelectionAfterScroll.KeepRequestedUntilPositionChanges
                 ) {
