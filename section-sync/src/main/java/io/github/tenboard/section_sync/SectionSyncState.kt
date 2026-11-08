@@ -73,8 +73,6 @@ internal class DefaultSectionSyncState<K : Any>(
     var isProgrammaticScroll by mutableStateOf(false)
         private set
 
-    private var latestScrollRequestId: Long = 0L
-
     init {
         validateNonSelectableItemIndices(this.anchors, this.nonSelectableItemIndices, this.gapItemCountBeforeSection)
     }
@@ -172,7 +170,6 @@ internal class DefaultSectionSyncState<K : Any>(
     }
 
     private fun cancelScrollRequest() {
-        latestScrollRequestId++
         activeScrollJob?.cancel()
     }
 
@@ -194,7 +191,6 @@ internal class DefaultSectionSyncState<K : Any>(
             return@coroutineScope
         }
 
-        val requestId = ++latestScrollRequestId
         val requestSelectionRevision = selectionRevision
         val wasScrolling = gridState.isScrollInProgress
         val scrollBehavior = sectionSyncOptions.ongoingScrollBehavior
@@ -225,7 +221,7 @@ internal class DefaultSectionSyncState<K : Any>(
             }
 
             ensureActive()
-            if (isDisposed || requestId != latestScrollRequestId) {
+            if (isDisposed) {
                 return@coroutineScope
             }
 
@@ -243,7 +239,7 @@ internal class DefaultSectionSyncState<K : Any>(
             if (activeScrollJob === requestJob) {
                 activeScrollJob = null
                 isProgrammaticScroll = false
-                val succeeded = completed && requestId == latestScrollRequestId && !isDisposed
+                val succeeded = completed && !isDisposed
                 if (succeeded) lastConfirmedPath = path
                 // A cancelled request's provisional path must never become the KeepCurrent fallback.
                 mutableActivePath = lastConfirmedPath
