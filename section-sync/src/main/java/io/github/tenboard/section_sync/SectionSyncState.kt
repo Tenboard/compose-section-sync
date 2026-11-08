@@ -5,6 +5,7 @@ import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.gestures.stopScroll
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
@@ -21,7 +22,7 @@ interface SectionSyncState<K : Any> {
     /**
      * Call from a coroutine with a Compose frame clock, such as one launched using
      * `rememberCoroutineScope` or `LaunchedEffect`.
-     * The request is cancelled if the anchor mapping changes, another request supersedes it,
+     * The request is cancelled if the anchor/excluded-item mapping changes, another request supersedes it,
      * or this state leaves the Composition.
      */
     suspend fun scrollToSection(path: SectionPath<K>)
@@ -29,7 +30,7 @@ interface SectionSyncState<K : Any> {
     /**
      * Call from a coroutine with a Compose frame clock, such as one launched using
      * `rememberCoroutineScope` or `LaunchedEffect`.
-     * The request is cancelled if the anchor mapping changes, another request supersedes it,
+     * The request is cancelled if the anchor/excluded-item mapping changes, another request supersedes it,
      * or this state leaves the Composition.
      */
     suspend fun animateScrollToSection(path: SectionPath<K>)
@@ -49,13 +50,19 @@ internal class DefaultSectionSyncState<K : Any>(
     anchors: List<SectionAnchor<K>>,
     private val gridState: LazyGridState,
     sectionSyncOptions: SectionSyncOptions,
+    nonSelectableItemIndices: Set<Int> = emptySet(),
+    gapItemCountBeforeSection: Int = 0,
 ) : SectionSyncState<K> {
 
     var anchors by mutableStateOf(anchors.toList().also { validateAnchors(it) })
         private set
 
     private var sectionSyncOptions by mutableStateOf(sectionSyncOptions)
+    private var nonSelectableItemIndices by mutableStateOf(nonSelectableItemIndices.toSet())
+    private var gapItemCountBeforeSection by mutableIntStateOf(gapItemCountBeforeSection)
     private var retainedPosition: Pair<Int, Int>? = null
+    private var lastConfirmedPath: SectionPath<K>? = null
+    private var selectionRevision = 0L
     private var activeScrollJob: Job? = null
     private var isDisposed = false
 
@@ -68,6 +75,10 @@ internal class DefaultSectionSyncState<K : Any>(
 
     private var latestScrollRequestId: Long = 0L
 
+    init {
+        validateNonSelectableItemIndices(this.anchors, this.nonSelectableItemIndices, this.gapItemCountBeforeSection)
+    }
+
     fun gridSnapshot() = GridSnapshot(
         anchors = anchors,
         hasVisibleItems = gridState.layoutInfo.visibleItemsInfo.isNotEmpty(),
@@ -77,6 +88,8 @@ internal class DefaultSectionSyncState<K : Any>(
         canScrollBackward = gridState.canScrollBackward,
         isProgrammaticScroll = isProgrammaticScroll,
         options = sectionSyncOptions,
+        nonSelectableItemIndices = nonSelectableItemIndices,
+        gapItemCountBeforeSection = gapItemCountBeforeSection,
     )
 
     fun syncActivePath() {
@@ -86,6 +99,7 @@ internal class DefaultSectionSyncState<K : Any>(
         val snapshot = gridSnapshot()
         if (snapshot.anchors.isEmpty() || !snapshot.hasVisibleItems) {
             retainedPosition = null
+            lastConfirmedPath = null
             mutableActivePath = null
             return
         }
@@ -93,38 +107,55 @@ internal class DefaultSectionSyncState<K : Any>(
         val position = snapshot.firstVisibleItemIndex to snapshot.firstVisibleItemScrollOffset
         if (retainedPosition == position) return
         retainedPosition = null
-        mutableActivePath = resolveActiveSectionValidated(
+        lastConfirmedPath = resolveActiveSectionValidated(
             anchors = snapshot.anchors,
             visibleGridItem = VisibleGridItem(snapshot.firstVisibleItemIndex),
             canScrollForward = snapshot.canScrollForward,
             canScrollBackward = snapshot.canScrollBackward,
             options = snapshot.options,
+            nonSelectableItemIndices = snapshot.nonSelectableItemIndices,
+            previousActivePath = lastConfirmedPath,
+            gapItemCountBeforeSection = snapshot.gapItemCountBeforeSection,
         )?.path
+        mutableActivePath = lastConfirmedPath
     }
 
     fun updateInputs(
         anchors: List<SectionAnchor<K>>,
         sectionSyncOptions: SectionSyncOptions,
+        nonSelectableItemIndices: Set<Int> = emptySet(),
+        gapItemCountBeforeSection: Int = 0,
     ) {
         if (isDisposed) return
 
         val anchorsChanged = this.anchors != anchors
-        if (anchorsChanged) validateAnchors(anchors)
-        val selectionChanged =
-            this.sectionSyncOptions.shortContentSelection != sectionSyncOptions.shortContentSelection ||
-                this.sectionSyncOptions.endOfContentSelection != sectionSyncOptions.endOfContentSelection ||
-                this.sectionSyncOptions.selectionAfterScroll != sectionSyncOptions.selectionAfterScroll
+        val excludedItemsChanged = this.nonSelectableItemIndices != nonSelectableItemIndices
+        val gapCountChanged = this.gapItemCountBeforeSection != gapItemCountBeforeSection
+        val mappingChanged = anchorsChanged || excludedItemsChanged || gapCountChanged
+        if (mappingChanged) {
+            validateAnchors(anchors)
+            validateNonSelectableItemIndices(anchors, nonSelectableItemIndices, gapItemCountBeforeSection)
+        }
+
+        val previousOptions = this.sectionSyncOptions
+        val selectionChanged = previousOptions != sectionSyncOptions.copy(
+            ongoingScrollBehavior = previousOptions.ongoingScrollBehavior,
+        )
 
         this.sectionSyncOptions = sectionSyncOptions
-        if (anchorsChanged) {
+        if (mappingChanged) {
             cancelScrollRequest()
             this.anchors = anchors.toList()
+            this.nonSelectableItemIndices = nonSelectableItemIndices.toSet()
+            this.gapItemCountBeforeSection = gapItemCountBeforeSection
 
-            if (this.anchors.none { it.path == activePath }) {
-                mutableActivePath = null
+            if (this.anchors.none { it.path == lastConfirmedPath }) {
+                lastConfirmedPath = null
             }
+            mutableActivePath = lastConfirmedPath
         }
-        if (anchorsChanged || selectionChanged) {
+        if (mappingChanged || selectionChanged) {
+            selectionRevision++
             retainedPosition = null
             syncActivePath()
         }
@@ -136,6 +167,7 @@ internal class DefaultSectionSyncState<K : Any>(
         isDisposed = true
         cancelScrollRequest()
         retainedPosition = null
+        lastConfirmedPath = null
         mutableActivePath = null
     }
 
@@ -163,6 +195,7 @@ internal class DefaultSectionSyncState<K : Any>(
         }
 
         val requestId = ++latestScrollRequestId
+        val requestSelectionRevision = selectionRevision
         val wasScrolling = gridState.isScrollInProgress
         val scrollBehavior = sectionSyncOptions.ongoingScrollBehavior
         val previousJob = activeScrollJob
@@ -210,9 +243,12 @@ internal class DefaultSectionSyncState<K : Any>(
             if (activeScrollJob === requestJob) {
                 activeScrollJob = null
                 isProgrammaticScroll = false
-                if (completed && requestId == latestScrollRequestId && !isDisposed &&
-                    sectionSyncOptions.selectionAfterScroll ==
-                    SelectionAfterScroll.KeepRequestedUntilPositionChanges
+                val succeeded = completed && requestId == latestScrollRequestId && !isDisposed
+                if (succeeded) lastConfirmedPath = path
+                // A cancelled request's provisional path must never become the KeepCurrent fallback.
+                mutableActivePath = lastConfirmedPath
+                if (succeeded && requestSelectionRevision == selectionRevision &&
+                    sectionSyncOptions.selectionAfterScroll == SelectionAfterScroll.KeepRequestedUntilPositionChanges
                 ) {
                     retainedPosition = gridState.firstVisibleItemIndex to gridState.firstVisibleItemScrollOffset
                 }
