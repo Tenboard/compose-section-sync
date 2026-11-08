@@ -1,10 +1,11 @@
 package io.github.tenboard.composesectionsync.ui
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -22,7 +23,7 @@ import io.github.tenboard.composesectionsync.ui.component.MenuGridItem
 import io.github.tenboard.composesectionsync.ui.component.PrimaryCategoryTabRow
 import io.github.tenboard.composesectionsync.ui.component.SecondaryCategoryTabRow
 import io.github.tenboard.section_sync.OngoingScrollBehavior
-import io.github.tenboard.section_sync.SectionAnchor
+import io.github.tenboard.section_sync.NonSelectableItemSelection
 import io.github.tenboard.section_sync.SectionPath
 import io.github.tenboard.section_sync.SectionSyncOptions
 import io.github.tenboard.section_sync.activeKeyAtOrNull
@@ -36,14 +37,16 @@ fun MenuSampleScreen() {
     val data = SampleMenuDataSource
     val primaryCategories = data.primaryCategories
 
-    val anchors = remember { getAnchors() }
+    val mapping = remember(primaryCategories) { createMenuGridMapping(primaryCategories) }
 
     val gridState = rememberLazyGridState()
     val syncState = rememberSectionSyncState(
-        anchors = anchors,
+        anchors = mapping.anchors,
         gridState = gridState,
+        gapItemCountBeforeSection = 1,
         sectionSyncOptions = SectionSyncOptions(
             ongoingScrollBehavior = OngoingScrollBehavior.InterruptAndProceed,
+            nonSelectableItemSelection = NonSelectableItemSelection.KeepCurrent,
         ),
     )
 
@@ -122,7 +125,15 @@ fun MenuSampleScreen() {
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            data.categories.forEach { category ->
+            data.categories.forEachIndexed { categoryIndex, category ->
+                if (categoryIndex > 0) {
+                    item(
+                        key = "gap:${category.id}",
+                        span = { GridItemSpan(maxLineSpan) },
+                    ) {
+                        Spacer(Modifier.height(40.dp))
+                    }
+                }
                 item(
                     key = "header:${category.id}",
                     span = { GridItemSpan(maxLineSpan) }
@@ -141,29 +152,6 @@ fun MenuSampleScreen() {
             }
         }
     }
-}
-
-private fun getAnchors(): List<SectionAnchor<String>> {
-    val anchors = mutableListOf<SectionAnchor<String>>()
-
-    var firstItemIndex = 0
-    SampleMenuDataSource.primaryCategories.forEach { primaryCategory ->
-        primaryCategory.subCategories.forEach { category ->
-            anchors.add(
-                SectionAnchor(
-                    path = SectionPath.of(
-                        primaryCategory.id, category.id,
-                    ),
-                    firstItemIndex = firstItemIndex,
-                )
-            )
-
-            // Add header index
-            firstItemIndex += 1 + category.menuList.size
-        }
-    }
-
-    return anchors
 }
 
 private const val PRIMARY_CATEGORY_LEVEL = 0

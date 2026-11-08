@@ -10,7 +10,9 @@ import androidx.compose.runtime.Immutable
  * @property shortContentSelection Selects a section when the grid cannot scroll in either direction.
  * @property endOfContentSelection Selects a section at the end of otherwise scrollable content.
  * @property selectionAfterScroll Determines selection after a section scroll completes successfully.
- * Changes to these three selection policies clear any retained selection and re-evaluate the viewport.
+ * @property nonSelectableItemSelection Selects a section when the first visible item is excluded.
+ * Excluded-item selection takes precedence over short-content and end-of-content selection.
+ * Changes to any selection policy clear retained selection and re-evaluate the viewport.
  */
 @Immutable
 data class SectionSyncOptions(
@@ -18,7 +20,18 @@ data class SectionSyncOptions(
     val shortContentSelection: BoundarySelection = BoundarySelection.FirstAnchor,
     val endOfContentSelection: BoundarySelection = BoundarySelection.LastAnchor,
     val selectionAfterScroll: SelectionAfterScroll = SelectionAfterScroll.KeepRequestedUntilPositionChanges,
+    val nonSelectableItemSelection: NonSelectableItemSelection = NonSelectableItemSelection.KeepCurrent,
 )
+
+/** Defines selection for an excluded grid item, such as a full-span category spacer. */
+enum class NonSelectableItemSelection {
+    /** Selects the preceding anchor, or keeps the current section if there is no preceding anchor. */
+    PreviousSection,
+    /** Selects the following anchor, or keeps the current section if there is no following anchor. */
+    NextSection,
+    /** Keeps the last confirmed section, or null if it is absent from the current anchors. */
+    KeepCurrent,
+}
 
 /**
  * Defines how a section scroll request is handled while the grid is already scrolling.
@@ -36,7 +49,7 @@ enum class OngoingScrollBehavior {
     InterruptAndDiscardRequest,
 }
 
-/** Selects a section at a content boundary. Short-content policy takes precedence over end policy. */
+/** Selects a section at a content boundary unless the first visible item is explicitly excluded. */
 enum class BoundarySelection {
     /** Selects the first anchor in the supplied list. */
     FirstAnchor,
@@ -52,7 +65,7 @@ enum class SelectionAfterScroll {
     FollowViewport,
     /**
      * Retains the requested path until the first visible item index or its scroll offset changes.
-     * Anchor or selection-policy changes also clear it. A new request replaces the retained selection.
+     * Mapping or selection-policy changes also clear it. A new request replaces the retained selection.
      */
     KeepRequestedUntilPositionChanges,
 }
