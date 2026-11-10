@@ -1,8 +1,8 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
     id("com.vanniktech.maven.publish.base") version "0.34.0"
     signing
@@ -14,6 +14,11 @@ android {
 
     defaultConfig {
         minSdk = 21
+
+        aarMetadata {
+            // Preserve the previous AAR requirement; dependencies declare their own minimum SDKs.
+            minCompileSdk = 1
+        }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -35,6 +40,9 @@ android {
 
 kotlin {
     compilerOptions {
+        // Keep consumer compatibility independent of the build compiler version.
+        languageVersion.set(KotlinVersion.KOTLIN_2_0)
+        apiVersion.set(KotlinVersion.KOTLIN_2_0)
         jvmTarget.set(JvmTarget.JVM_11)
     }
 }
@@ -59,7 +67,7 @@ publishing {
 }
 
 mavenPublishing {
-    coordinates("io.github.tenboard", "compose-section-sync", "0.1.0-beta01")
+    coordinates("io.github.tenboard", "compose-section-sync", "0.2.0-beta01")
     publishToMavenCentral(automaticRelease = false)
     signAllPublications()
 
@@ -106,6 +114,7 @@ tasks.withType<Jar>().matching { it.name == "javaDocReleaseJar" }.configureEach 
 }
 
 dependencies {
+    api(libs.kotlin.stdlib)
     api(libs.androidx.compose.foundation)
     api(libs.androidx.compose.runtime)
 

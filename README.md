@@ -14,13 +14,15 @@ scrolling in sync in both directions.
 Configure `google()` and `mavenCentral()` in your project's repositories, then add:
 
 ```kotlin
-implementation("io.github.tenboard:compose-section-sync:0.1.0-beta01")
+implementation("io.github.tenboard:compose-section-sync:0.2.0-beta01")
 ```
 
 ## Compatibility
 
 - Android: API 21 or higher.
-- Kotlin / Compose Compiler build baseline: 2.0.21.
+- Consumer Kotlin baseline: 2.0.21 or higher.
+- Published library: Kotlin language/API level 2.0 and stdlib dependency 2.0.21.
+- Library build toolchain: Kotlin / Compose Compiler 2.2.10.
 
 For Kotlin 2.0+ projects, use the
 [Compose Compiler Gradle plugin](https://developer.android.com/develop/ui/compose/setup-compose-dependencies-and-compiler)
@@ -235,8 +237,7 @@ The default empty set and gap count of zero preserve existing viewport behavior.
 Adding the public parameters and the `SectionSyncOptions` property changes JVM signatures,
 including the options constructor and `copy`; rebuild dependent code when
 upgrading. Ordinary Kotlin calls using the existing arguments remain valid on
-recompilation. These additions require a new library release before they can
-be used through the Maven dependency above.
+recompilation. These additions are introduced in `0.2.0-beta01`.
 
 ## Sample
 
